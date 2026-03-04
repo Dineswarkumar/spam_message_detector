@@ -18,7 +18,7 @@ RakshaSutra is a hybrid multilingual platform designed to detect scam messages, 
 - **Deployment:** Render (Web Service)
 
 ---
-
+**deployed online---https://spam-message-detector-mk6g.onrender.com/static/index.html**
 ## 💻 How to Run Locally
 
 ### Prerequisites
