@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RakshaSutra — Fraud Intelligence Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       DASHBOARD — Extension styles only.
+       All base styles, variables, navbar, footer, cards,
+       buttons, typography come from style.css.
+    ═══════════════════════════════════════════════════════════ */
+
+    /* ── Dashboard Hero (reuses analyzer-hero pattern from style.css) ── */
+    .dash-hero {
+      background: var(--navy);
+      padding: 64px 32px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .dash-hero__grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(29,132,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29,132,255,0.05) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+      pointer-events: none;
+    }
+    .dash-hero__orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+    }
+    .dash-hero__orb--l {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(230,57,70,0.13) 0%, transparent 70%);
+      top: -100px; left: -60px;
+    }
+    .dash-hero__orb--r {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(29,132,255,0.11) 0%, transparent 70%);
+      bottom: -120px; right: -70px;
+    }
+    .dash-hero__content { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; }
+
+    .dash-hero__title {
+      font-family: var(--font-display);
+      font-size: var(--fs-h1);
+      font-weight: 800; color: #fff;
+      letter-spacing: -0.02em; line-height: 1.35; margin-bottom: 16px;
+      padding-bottom: 0.12em;
+    }
+    .dash-hero__title span { color: var(--crimson); }
+    .dash-hero__sub {
+      font-size: 1rem; font-weight: 400;
+      color: rgba(255,255,255,0.48); line-height: 2;
+      padding-bottom: 0.4em;
+    }
+
+    /* ── Dashboard Body ─────────────────────────────────────── */
+    .dash-body {
+      background: var(--bg);
+      padding: 48px 0 96px;
+    }
+
+    /* ── KPI Strip ──────────────────────────────────────────── */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .kpi-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px 24px;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow var(--transition), transform var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      opacity: 0; transition: opacity var(--transition);
+    }
+    .kpi-card:hover { box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+    .kpi-card:hover::before { opacity: 1; }
+    .kpi-card--red::before   { background: linear-gradient(90deg, var(--crimson), #f97316); }
+    .kpi-card--blue::before  { background: linear-gradient(90deg, var(--electric), #06B6D4); }
+    .kpi-card--amber::before { background: linear-gradient(90deg, #F59E0B, #f97316); }
+    .kpi-card--green::before { background: linear-gradient(90deg, #10B981, #06B6D4); }
+
+    .kpi-card__eyebrow {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+    }
+    .kpi-card__value {
+      font-family: var(--font-display);
+      font-size: 32px; font-weight: 700;
+      color: var(--navy); line-height: 1; margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+    .kpi-card__value--red   { color: var(--crimson); }
+    .kpi-card__value--amber { color: #B45309; }
+    .kpi-card__value--green { color: #059669; }
+    .kpi-card__sub {
+      font-size: 0.95rem; color: var(--muted);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .kpi-trend { font-weight: 600; }
+    .kpi-trend--up   { color: var(--crimson); }
+    .kpi-trend--down { color: #059669; }
+
+    /* ── Filter Bar ─────────────────────────────────────────── */
+    .filter-bar {
+      display: flex; align-items: center; gap: 14px;
+      flex-wrap: wrap; margin-bottom: 24px;
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 24px;
+      box-shadow: var(--shadow-card);
+    }
+    .filter-bar__label {
+      font-size: 0.85rem; font-weight: 500;
+      color: var(--muted); letter-spacing: 0.06em;
+      text-transform: uppercase; white-space: nowrap;
+    }
+    .filter-select {
+      padding: 8px 32px 8px 12px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: var(--font-body);
+      font-size: 1rem; color: var(--charcoal);
+      cursor: pointer; outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6478' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .filter-select:focus {
+      border-color: var(--electric);
+      box-shadow: 0 0 0 3px var(--electric-dim);
+    }
+    .filter-bar__spacer { flex: 1; }
+    .filter-bar__updated {
+      font-size: 0.9rem; color: var(--muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .filter-live-dot {
+      width: 7px; height: 7px;
+      background: #10B981; border-radius: 50%;
+      box-shadow: 0 0 6px rgba(16,185,129,0.5);
+      animation: db-blink 2s ease-in-out infinite;
+    }
+    @keyframes db-blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── Main 2-col grid ────────────────────────────────────── */
+    .dash-main-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+      align-items: start;
+    }
+
+    /* ── Dashboard card (extends .solution__card) ───────────── */
+    .db-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: box-shadow var(--transition);
+    }
+    .db-card:hover { box-shadow: var(--shadow-card-hover); }
+
+    .db-card__head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .db-card__head-icon {
+      width: 30px; height: 30px;
+      background: var(--crimson-dim);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .db-card__head-icon--blue { background: var(--electric-dim); }
+    .db-card__head-icon--amber { background: rgba(245,158,11,0.1); }
+    .db-card__head-icon--green { background: rgba(16,185,129,0.1); }
+
+    .db-card__title {
+      font-family: var(--font-display);
+      font-size: 1rem; font-weight: 700; color: var(--navy);
+      line-height: 1.22;
+    }
+    .db-card__subtitle { font-size: 0.9rem; color: var(--muted); margin-left: auto; }
+    .db-card__body { padding: 20px; }
+
+    /* ── India SVG Map ──────────────────────────────────────── */
+    #india-map-wrap {
+      position: relative;
+      width: 100%;
+      min-height: 420px;
+    }
+    #india-svg {
+      width: 100%; height: auto;
+      display: block;
+    }
+    .state-path {
+      cursor: pointer;
+      stroke: rgba(255,255,255,0.6);
+      stroke-width: 0.8;
+      transition: filter 0.18s, stroke-width 0.18s, stroke 0.18s;
+    }
+    .state-path:hover {
+      stroke: var(--navy);
+      stroke-width: 1.5;
+      filter: brightness(1.15) drop-shadow(0 2px 6px rgba(11,31,58,0.22));
+    }
+    .state-path.risk-low      { fill: #6EE7B7; }
+    .state-path.risk-medium   { fill: #FCD34D; }
+    .state-path.risk-high     { fill: #FB923C; }
+    .state-path.risk-critical { fill: #EF4444; }
+
+    /* Tooltip */
+    #map-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: var(--navy);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.9);
+      box-shadow: 0 8px 24px rgba(11,31,58,0.3);
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10;
+      min-width: 180px;
+    }
+    #map-tooltip.visible { opacity: 1; }
+    .tooltip__state-name {
+      font-family: var(--font-display);
+      font-size: 14px; font-weight: 700; color: #fff;
+      margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 6px;
+    }
+    .tooltip__row {
+      display: flex; justify-content: space-between; gap: 16px;
+      margin-bottom: 4px; font-size: 12px;
+    }
+    .tooltip__key { color: rgba(255,255,255,0.5); }
+    .tooltip__val { color: #fff; font-weight: 500; }
+    .tooltip__risk-badge {
+      display: inline-block; margin-top: 8px;
+      font-size: 11px; padding: 2px 10px; border-radius: 100px;
+      font-weight: 600;
+    }
+    .tooltip__risk-badge.low      { background: rgba(110,231,183,0.15); color: #6EE7B7; }
+    .tooltip__risk-badge.medium   { background: rgba(252,211,77,0.15);  color: #D97706; }
+    .tooltip__risk-badge.high     { background: rgba(251,146,60,0.15);  color: #EA580C; }
+    .tooltip__risk-badge.critical { background: rgba(239,68,68,0.15);   color: #EF4444; }
+
+    /* Map legend */
+    .map-legend {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 14px 22px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
+    }
+    .legend-dot--low      { background: #6EE7B7; }
+    .legend-dot--medium   { background: #FCD34D; }
+    .legend-dot--high     { background: #FB923C; }
+    .legend-dot--critical { background: #EF4444; }
+
+    /* ── Charts ─────────────────────────────────────────────── */
+    .chart-wrap {
+      position: relative;
+      width: 100%; height: 260px;
+    }
+    .chart-wrap--tall { height: 300px; }
+
+    /* ── Campaign Intelligence ──────────────────────────────── */
+    .campaign-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .campaign-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 15px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--crimson);
+      border-radius: var(--radius-md);
+      transition: box-shadow var(--transition), transform var(--transition);
+    }
+    .campaign-item:hover {
+      box-shadow: var(--shadow-card);
+      transform: translateX(3px);
+    }
+    .campaign-item--amber { border-left-color: #F59E0B; }
+    .campaign-item--blue  { border-left-color: var(--electric); }
+
+    .campaign-item__icon {
+      width: 32px; height: 32px;
+      background: var(--crimson-dim);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .campaign-item--amber .campaign-item__icon { background: rgba(245,158,11,0.1); }
+    .campaign-item--blue  .campaign-item__icon { background: var(--electric-dim); }
+
+    .campaign-item__body { flex: 1; }
+    .campaign-item__title {
+      font-family: var(--font-display);
+      font-size: 13.5px; font-weight: 700;
+      color: var(--navy); margin-bottom: 3px;
+    }
+    .campaign-item__detail { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+    .campaign-item__badge {
+      font-size: 10.5px; padding: 2px 8px; border-radius: 100px;
+      font-weight: 600; flex-shrink: 0; white-space: nowrap; margin-top: 2px;
+    }
+    .campaign-item__badge--red    { background: var(--crimson-dim); color: var(--crimson); }
+    .campaign-item__badge--amber  { background: rgba(245,158,11,0.1); color: #92400E; }
+    .campaign-item__badge--blue   { background: var(--electric-dim); color: #1D4ED8; }
+
+    /* ── Bottom 3-col grid ──────────────────────────────────── */
+    .dash-bottom-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Top States Table ───────────────────────────────────── */
+    .state-table { width: 100%; border-collapse: collapse; }
+    .state-table th {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); padding: 0 0 10px 0;
+      border-bottom: 1px solid var(--border); text-align: left;
+    }
+    .state-table td {
+      padding: 10px 0;
+      font-size: 13px; color: var(--charcoal);
+      border-bottom: 1px solid rgba(11,31,58,0.05);
+      vertical-align: middle;
+    }
+    .state-table tr:last-child td { border-bottom: none; }
+    .state-table tr:hover td { background: var(--bg); }
+
+    .risk-pill {
+      display: inline-block; padding: 2px 9px;
+      border-radius: 100px; font-size: 11px; font-weight: 600;
+    }
+    .risk-pill--low      { background: rgba(110,231,183,0.15); color: #059669; }
+    .risk-pill--medium   { background: rgba(252,211,77,0.15);  color: #B45309; }
+    .risk-pill--high     { background: rgba(251,146,60,0.15);  color: #C2410C; }
+    .risk-pill--critical { background: rgba(239,68,68,0.12);   color: var(--crimson); }
+
+    .mini-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .mini-bar {
+      flex: 1; height: 5px; background: var(--bg);
+      border-radius: 3px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .mini-bar__fill {
+      height: 100%; border-radius: 3px;
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── Disclaimer ─────────────────────────────────────────── */
+    .dash-disclaimer {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 12.5px; color: var(--muted);
+      margin-top: 8px;
+    }
+    .dash-disclaimer__icon { font-size: 16px; flex-shrink: 0; }
+
+    /* ── Fade-in animation ──────────────────────────────────── */
+    .fade-in {
+      opacity: 0; transform: translateY(16px);
+      animation: dbFadeUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+    }
+    @keyframes dbFadeUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in:nth-child(1) { animation-delay: 0.05s; }
+    .fade-in:nth-child(2) { animation-delay: 0.12s; }
+    .fade-in:nth-child(3) { animation-delay: 0.19s; }
+    .fade-in:nth-child(4) { animation-delay: 0.26s; }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+      .dash-main-grid { grid-template-columns: 1fr; }
+      .dash-bottom-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .container { padding: 0 18px; }
+      .dash-body { padding: 32px 0 64px; }
+      .dash-hero { padding: 52px 18px 40px; }
+      .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .dash-bottom-grid { grid-template-columns: 1fr; }
+      .filter-bar { padding: 14px 16px; gap: 10px; }
+      .filter-select { font-size: 13px; }
+      .filter-bar__spacer { display: none; }
+    }
+    @media (max-width: 400px) {
+      .kpi-strip { grid-template-columns: 1fr 1fr; }
+      .kpi-card__value { font-size: 24px; }
+    }
+
+    /* az-status reuse from style.css extension */
+    .az-status {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 12px; color: var(--muted); letter-spacing: 0.04em;
+    }
+    .az-status__dot {
+      width: 7px; height: 7px; background: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(16,185,129,0.5);
+      animation: az-blink 2s ease-in-out infinite;
+    }
+    @keyframes az-blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .navbar.scrolled { box-shadow: var(--shadow-nav); }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════ NAVBAR ══════════════════════════════ -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="logo__mark"></span>
+        RakshaSutra
+      </a>
+      <nav class="navbar__nav">
+        <a href="index.html"   class="nav__link">Home</a>
+        <a href="analyzer.html" class="nav__link">Analyzer</a>
+        <a href="dashboard.html" class="nav__link nav__link--active">Dashboard</a>
+        <a href="awareness.html" class="nav__link">Awareness</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ═══════════════════════════ HERO ════════════════════════════════ -->
+    <section class="dash-hero">
+      <div class="dash-hero__grid"></div>
+      <div class="dash-hero__orb dash-hero__orb--l"></div>
+      <div class="dash-hero__orb dash-hero__orb--r"></div>
+      <div class="dash-hero__content">
+        <h1 class="dash-hero__title">
+          Fraud Intelligence<br><span>Heatmap Dashboard</span>
+        </h1>
+        <p class="dash-hero__sub">
+          Visualizing scam activity patterns across India — powered by hybrid ML detection and behavioral analytics.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════ BODY ════════════════════════════════ -->
+    <section class="dash-body">
+      <div class="container">
+
+        <!-- KPI Strip -->
+        <div class="kpi-strip">
+          <div class="kpi-card kpi-card--red fade-in">
+            <div class="kpi-card__eyebrow">Total Reports</div>
+            <div class="kpi-card__value kpi-card__value--red" id="kpi-total">28,472</div>
+            <div class="kpi-card__sub"><span class="kpi-trend kpi-trend--up">↑ 12.4%</span> vs prev period</div>
+          </div>
+          <div class="kpi-card kpi-card--amber fade-in">
+            <div class="kpi-card__eyebrow">Critical Risk States</div>
+            <div class="kpi-card__value kpi-card__value--amber" id="kpi-critical">7</div>
+            <div class="kpi-card__sub"><span class="kpi-trend kpi-trend--up">↑ 2</span> states this period</div>
+          </div>
+          <div class="kpi-card kpi-card--blue fade-in">
+            <div class="kpi-card__eyebrow">Top Scam Category</div>
+            <div class="kpi-card__value" style="font-size:20px; padding-top:4px;" id="kpi-top-cat">UPI Scam</div>
+            <div class="kpi-card__sub">34% of all reports</div>
+          </div>
+          <div class="kpi-card kpi-card--green fade-in">
+            <div class="kpi-card__eyebrow">Detection Accuracy</div>
+            <div class="kpi-card__value kpi-card__value--green">95.2%</div>
+            <div class="kpi-card__sub"><span class="kpi-trend kpi-trend--down">↑ 1.1%</span> this month</div>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <span class="filter-bar__label">🔽 Filters:</span>
+          <select class="filter-select" id="filterCategory" onchange="applyFilters()">
+            <option value="all">All Categories</option>
+            <option value="upi">UPI Scam</option>
+            <option value="kyc">KYC Update Scam</option>
+            <option value="lottery">Lottery Scam</option>
+            <option value="job">Job Fraud</option>
+            <option value="crypto">Crypto Investment Scam</option>
+            <option value="loan">Loan Scam</option>
+          </select>
+          <select class="filter-select" id="filterTime" onchange="applyFilters()">
+            <option value="7">Last 7 Days</option>
+            <option value="30" selected>Last 30 Days</option>
+            <option value="180">Last 6 Months</option>
+            <option value="365">1 Year</option>
+          </select>
+          <div class="filter-bar__spacer"></div>
+          <div class="filter-bar__updated">
+          </div>
+        </div>
+
+        <!-- Main grid: Map + Campaign -->
+        <div class="dash-main-grid">
+
+          <!-- India Heatmap -->
+          <div class="db-card">
+            <div class="db-card__head">
+              <div class="db-card__head-icon">🗺️</div>
+              <div>
+                <div class="db-card__title">Fraud Risk Distribution Across India</div>
+              </div>
+              <span class="db-card__subtitle" id="mapSubtitle">30-Day Window</span>
+            </div>
+            <div class="db-card__body" style="padding: 16px 20px 0;">
+              <div id="india-map-wrap">
+                <svg id="india-svg" viewBox="0 0 800 900" xmlns="http://www.w3.org/2000/svg"></svg>
+                <div id="map-tooltip"></div>
+              </div>
+            </div>
+            <div class="map-legend">
+              <div class="legend-item"><div class="legend-dot legend-dot--low"></div> Low Risk (0–35)</div>
+              <div class="legend-item"><div class="legend-dot legend-dot--medium"></div> Medium (36–60)</div>
+              <div class="legend-item"><div class="legend-dot legend-dot--high"></div> High (61–80)</div>
+              <div class="legend-item"><div class="legend-dot legend-dot--critical"></div> Critical (81+)</div>
+            </div>
+          </div>
+
+          <!-- Campaign Intelligence -->
+          <div style="display:flex; flex-direction:column; gap:22px;">
+            <div class="db-card">
+              <div class="db-card__head">
+                <div class="db-card__head-icon">📡</div>
+                <div class="db-card__title">Active Campaign Insights</div>
+              </div>
+              <div class="db-card__body">
+                <div class="campaign-list" id="campaignList">
+                  <!-- JS rendered -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Donut chart -->
+            <div class="db-card">
+              <div class="db-card__head">
+                <div class="db-card__head-icon db-card__head-icon--blue">🏷️</div>
+                <div class="db-card__title">Scam Category Distribution</div>
+              </div>
+              <div class="db-card__body">
+                <div class="chart-wrap">
+                  <canvas id="donutChart"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /dash-main-grid -->
+
+        <!-- Bottom 3-col grid -->
+        <div class="dash-bottom-grid">
+
+          <!-- Trend Line Chart -->
+          <div class="db-card" style="grid-column: span 2;">
+            <div class="db-card__head">
+              <div class="db-card__head-icon db-card__head-icon--amber">📈</div>
+              <div>
+                <div class="db-card__title">Fraud Activity Trend</div>
+              </div>
+            </div>
+            <div class="db-card__body">
+              <div class="chart-wrap chart-wrap--tall">
+                <canvas id="trendChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top States -->
+          <div class="db-card">
+            <div class="db-card__head">
+              <div class="db-card__head-icon db-card__head-icon--green">🏆</div>
+              <div class="db-card__title">Top Risk States</div>
+            </div>
+            <div class="db-card__body">
+              <table class="state-table" id="topStatesTable">
+                <thead>
+                  <tr>
+                    <th>State</th>
+                    <th>Risk Index</th>
+                    <th>Level</th>
+                  </tr>
+                </thead>
+                <tbody id="topStatesBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div><!-- /dash-bottom-grid -->
+
+        <!-- Disclaimer -->
+
+      </div><!-- /container -->
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════ FOOTER ══════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="logo__mark logo__mark--sm"></span>
+          <span class="footer__name">RakshaSutra</span>
+        </div>
+        <div class="footer__meta">
+          <span class="footer__sep">·</span>
+          <span>Team RakshaSutra</span>
+          <span class="footer__sep">·</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  // ═══════════════════════════════════════════════════════════
+  //  DASHBOARD.JS — Inline for single-file portability
+  // ═══════════════════════════════════════════════════════════
+
+  // ── Navbar scroll ───────────────────────────────────────────
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+  });
+
+  // ── State Data ──────────────────────────────────────────────
+  const BASE_STATE_DATA = [
+    { id:'MH', name:'Maharashtra',       risk:78, cat:'UPI Scam',         reports:3245 },
+    { id:'DL', name:'Delhi',             risk:84, cat:'KYC Scam',         reports:2871 },
+    { id:'UP', name:'Uttar Pradesh',     risk:88, cat:'Lottery Scam',     reports:4120 },
+    { id:'RJ', name:'Rajasthan',         risk:62, cat:'Job Fraud',        reports:1580 },
+    { id:'GJ', name:'Gujarat',           risk:71, cat:'UPI Scam',         reports:1920 },
+    { id:'KA', name:'Karnataka',         risk:55, cat:'Crypto Scam',      reports:1340 },
+    { id:'TN', name:'Tamil Nadu',        risk:48, cat:'Loan Scam',        reports:1105 },
+    { id:'WB', name:'West Bengal',       risk:73, cat:'KYC Scam',         reports:2010 },
+    { id:'AP', name:'Andhra Pradesh',    risk:42, cat:'Job Fraud',        reports:890  },
+    { id:'TS', name:'Telangana',         risk:59, cat:'Crypto Scam',      reports:1220 },
+    { id:'MP', name:'Madhya Pradesh',    risk:66, cat:'Lottery Scam',     reports:1760 },
+    { id:'BR', name:'Bihar',             risk:82, cat:'UPI Scam',         reports:2640 },
+    { id:'HR', name:'Haryana',           risk:69, cat:'KYC Scam',         reports:1450 },
+    { id:'PB', name:'Punjab',            risk:58, cat:'Job Fraud',        reports:1120 },
+    { id:'OR', name:'Odisha',            risk:45, cat:'Loan Scam',        reports:780  },
+    { id:'JH', name:'Jharkhand',         risk:72, cat:'UPI Scam',         reports:1380 },
+    { id:'HP', name:'Himachal Pradesh',  risk:30, cat:'Job Fraud',        reports:310  },
+    { id:'UK', name:'Uttarakhand',       risk:38, cat:'Loan Scam',        reports:420  },
+    { id:'CH', name:'Chhattisgarh',      risk:52, cat:'Lottery Scam',     reports:880  },
+    { id:'AS', name:'Assam',             risk:44, cat:'UPI Scam',         reports:740  },
+    { id:'KL', name:'Kerala',            risk:36, cat:'Crypto Scam',      reports:610  },
+    { id:'GA', name:'Goa',               risk:22, cat:'Crypto Scam',      reports:180  },
+    { id:'JK', name:'J&K',              risk:34, cat:'Job Fraud',        reports:360  },
+    { id:'MN', name:'Manipur',           risk:28, cat:'Job Fraud',        reports:190  },
+    { id:'MG', name:'Meghalaya',         risk:25, cat:'Loan Scam',        reports:150  },
+    { id:'NL', name:'Nagaland',          risk:20, cat:'UPI Scam',         reports:120  },
+    { id:'TR', name:'Tripura',           risk:32, cat:'Job Fraud',        reports:230  },
+    { id:'SK', name:'Sikkim',            risk:18, cat:'Crypto Scam',      reports:90   },
+    { id:'AR', name:'Arunachal Pradesh', risk:21, cat:'Loan Scam',        reports:110  },
+    { id:'MI', name:'Mizoram',           risk:24, cat:'Job Fraud',        reports:140  },
+  ];
+
+  // Category filter multipliers per state category
+  const CAT_FILTER = {
+    all:    () => 1,
+    upi:    s => s.cat === 'UPI Scam'    ? 1.2 : 0.4,
+    kyc:    s => s.cat === 'KYC Scam'   ? 1.3 : 0.35,
+    lottery:s => s.cat === 'Lottery Scam' ? 1.25 : 0.4,
+    job:    s => s.cat === 'Job Fraud'  ? 1.2 : 0.45,
+    crypto: s => s.cat === 'Crypto Scam' ? 1.3 : 0.3,
+    loan:   s => s.cat === 'Loan Scam'  ? 1.2 : 0.4,
+  };
+
+  const TIME_MULT = { 7: 0.25, 30: 1, 180: 3.8, 365: 8.2 };
+
+  function getFilteredData() {
+    const cat = document.getElementById('filterCategory').value;
+    const days = document.getElementById('filterTime').value;
+    const tm = TIME_MULT[days] || 1;
+    return BASE_STATE_DATA.map(s => {
+      const catM = CAT_FILTER[cat] ? CAT_FILTER[cat](s) : 1;
+      const newRisk = Math.min(98, Math.round(s.risk * catM * (0.85 + Math.random() * 0.3)));
+      return { ...s, risk: newRisk, reports: Math.round(s.reports * tm * catM) };
+    });
+  }
+
+  function riskLevel(r) {
+    if (r >= 81) return 'critical';
+    if (r >= 61) return 'high';
+    if (r >= 36) return 'medium';
+    return 'low';
+  }
+  function riskLabel(r) {
+    return { critical:'Critical', high:'High', medium:'Medium', low:'Low' }[riskLevel(r)];
+  }
+
+  // ── India SVG Map ────────────────────────────────────────────
+  // Simplified but recognisable state paths (schematic polygons)
+  // Each state is a polygon approximation placed to reflect geography
+  const STATE_SHAPES = [
+    // [ id, d (SVG path) ]
+    ['JK', 'M200,30 L310,30 L330,80 L300,120 L240,140 L180,110 L170,70 Z'],
+    ['HP', 'M300,120 L350,110 L370,155 L330,175 L300,165 L280,140 Z'],
+    ['PB', 'M220,140 L300,120 L300,165 L260,185 L220,175 Z'],
+    ['UK', 'M350,110 L410,115 L420,165 L370,175 L330,175 L370,155 Z'],
+    ['HR', 'M260,185 L330,175 L340,215 L290,230 L255,215 Z'],
+    ['DL', 'M290,215 L325,210 L330,235 L295,238 Z'],
+    ['UP', 'M340,215 L460,200 L490,250 L470,310 L380,330 L330,290 L295,238 L330,235 Z'],
+    ['RJ', 'M160,215 L255,215 L290,230 L295,238 L290,320 L250,380 L180,390 L130,340 L120,270 Z'],
+    ['GJ', 'M100,320 L180,310 L200,360 L190,420 L160,460 L110,450 L80,400 L75,360 Z'],
+    ['MP', 'M250,310 L380,300 L420,330 L430,390 L370,430 L280,440 L220,410 L200,360 L250,360 Z'],
+    ['MH', 'M200,410 L280,400 L370,430 L400,480 L380,540 L320,570 L260,550 L200,510 L170,460 Z'],
+    ['BR', 'M460,250 L530,240 L560,290 L540,340 L480,360 L440,330 L420,290 Z'],
+    ['JH', 'M480,340 L540,330 L570,370 L560,420 L500,440 L460,410 L450,370 Z'],
+    ['WB', 'M540,290 L590,280 L610,330 L600,390 L560,420 L540,370 Z'],
+    ['SK', 'M600,270 L630,265 L635,295 L605,300 Z'],
+    ['AS', 'M590,250 L660,245 L680,270 L650,300 L600,310 L580,285 Z'],
+    ['AR', 'M650,210 L720,215 L730,250 L680,260 L650,245 Z'],
+    ['MN', 'M660,310 L700,305 L710,335 L670,345 Z'],
+    ['NL', 'M700,280 L730,275 L735,305 L705,310 L695,295 Z'],
+    ['MG', 'M620,305 L660,300 L660,330 L625,335 Z'],
+    ['TR', 'M635,355 L660,350 L665,375 L640,380 Z'],
+    ['MI', 'M645,380 L670,375 L672,400 L648,405 Z'],
+    ['OR', 'M460,410 L540,400 L560,450 L540,500 L480,510 L440,470 Z'],
+    ['CH', 'M380,400 L460,390 L480,440 L460,510 L400,520 L360,480 L350,440 Z'],
+    ['TS', 'M360,500 L440,490 L460,540 L430,590 L370,580 L340,540 Z'],
+    ['AP', 'M400,550 L480,530 L520,580 L510,640 L450,660 L390,640 L360,590 Z'],
+    ['KA', 'M290,530 L370,510 L410,560 L400,620 L350,650 L290,640 L260,590 Z'],
+    ['TN', 'M360,640 L430,650 L450,700 L420,760 L380,790 L340,760 L320,710 L330,670 Z'],
+    ['KL', 'M290,640 L340,650 L330,710 L310,760 L275,740 L265,690 L270,650 Z'],
+    ['GA', 'M220,530 L260,525 L265,555 L225,560 Z'],
+  ];
+
+  function buildMap() {
+    const svg = document.getElementById('india-svg');
+    const tooltip = document.getElementById('map-tooltip');
+    const data = getFilteredData();
+    const dataMap = {};
+    data.forEach(d => dataMap[d.id] = d);
+
+    svg.innerHTML = '';
+
+    STATE_SHAPES.forEach(([id, d]) => {
+      const state = dataMap[id];
+      if (!state) return;
+      const level = riskLevel(state.risk);
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      path.setAttribute('d', d);
+      path.setAttribute('class', `state-path risk-${level}`);
+      path.setAttribute('data-id', id);
+
+      const wrap = document.getElementById('india-map-wrap');
+      const svgRect = () => svg.getBoundingClientRect();
+      const wrapRect = () => wrap.getBoundingClientRect();
+
+      path.addEventListener('mouseenter', function(e) {
+        const pRect = path.getBoundingClientRect();
+        const wRect = wrapRect();
+        let tx = pRect.left - wRect.left + pRect.width / 2;
+        let ty = pRect.top  - wRect.top  + pRect.height;
+        // keep tooltip in bounds
+        tx = Math.min(tx, wRect.width - 200);
+        tx = Math.max(tx, 0);
+        tooltip.style.left = tx + 'px';
+        tooltip.style.top  = (ty + 8) + 'px';
+        tooltip.innerHTML = `
+          <div class="tooltip__state-name">${state.name}</div>
+          <div class="tooltip__row"><span class="tooltip__key">Risk Index</span><span class="tooltip__val">${state.risk}/100</span></div>
+          <div class="tooltip__row"><span class="tooltip__key">Top Scam</span><span class="tooltip__val">${state.cat}</span></div>
+          <div class="tooltip__row"><span class="tooltip__key">Reports</span><span class="tooltip__val">${state.reports.toLocaleString()}</span></div>
+          <span class="tooltip__risk-badge ${level}">${riskLabel(state.risk)} Risk</span>
+        `;
+        tooltip.classList.add('visible');
+      });
+
+      path.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+      svg.appendChild(path);
+    });
+
+    // Render top states table
+    renderTopStates(data);
+  }
+
+  // ── Top States Table ─────────────────────────────────────────
+  function renderTopStates(data) {
+    const sorted = [...data].sort((a,b) => b.risk - a.risk).slice(0, 8);
+    const tbody = document.getElementById('topStatesBody');
+    tbody.innerHTML = '';
+    const maxRisk = sorted[0].risk;
+    sorted.forEach(s => {
+      const level = riskLevel(s.risk);
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td style="font-weight:500; color:var(--navy);">${s.name}</td>
+        <td>
+          <div class="mini-bar-wrap">
+            <div class="mini-bar">
+              <div class="mini-bar__fill" style="width:${(s.risk/100*100)}%; background:${level==='critical'?'var(--crimson)':level==='high'?'#FB923C':level==='medium'?'#F59E0B':'#10B981'}"></div>
+            </div>
+            <span style="font-size:12px; font-weight:600; min-width:26px; text-align:right; color:var(--charcoal);">${s.risk}</span>
+          </div>
+        </td>
+        <td><span class="risk-pill risk-pill--${level}">${riskLabel(s.risk)}</span></td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  // ── KPI update ───────────────────────────────────────────────
+  function updateKPIs(data) {
+    const total = data.reduce((s,d) => s+d.reports, 0);
+    const critical = data.filter(d => riskLevel(d.risk) === 'critical').length;
+    // top category
+    const catCount = {};
+    data.forEach(d => catCount[d.cat] = (catCount[d.cat]||0) + d.reports);
+    const topCat = Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0][0];
+    document.getElementById('kpi-total').textContent = total.toLocaleString();
+    document.getElementById('kpi-critical').textContent = critical;
+    document.getElementById('kpi-top-cat').textContent = topCat;
+
+    // Update map subtitle
+    const days = document.getElementById('filterTime').value;
+    const labels = {7:'7-Day Window', 30:'30-Day Window', 180:'6-Month Window', 365:'1-Year Window'};
+    document.getElementById('mapSubtitle').textContent = labels[days] || '30-Day Window';
+  }
+
+  // ── Campaign Intelligence ────────────────────────────────────
+  const CAMPAIGNS_POOL = [
+    { icon:'⚡', type:'urgency', color:'',      badge:'CRITICAL', badgeClass:'--red',
+      title:'UPI Reward Scam Cluster Active',
+      detail:'Mass campaign detected across Maharashtra, UP, Bihar — 1,200+ identical messages in last 48h.' },
+    { icon:'📈', type:'surge',   color:'amber', badge:'SURGE',    badgeClass:'--amber',
+      title:'Loan Fraud Spike — North India',
+      detail:'Unusual spike in fraudulent loan offers targeting job seekers in Delhi, Punjab, Haryana.' },
+    { icon:'🌐', type:'spread',  color:'blue',  badge:'SPREADING', badgeClass:'--blue',
+      title:'Hinglish Lottery Scam Rising',
+      detail:'Hinglish-language lottery scam pattern spreading from UP to neighbouring states. NLP flagged.' },
+    { icon:'🔗', type:'phish',   color:'',      badge:'HIGH',     badgeClass:'--red',
+      title:'KYC Phishing Links — New Domain Cluster',
+      detail:'46 new phishing domains mimicking official KYC portals detected in last 7 days.' },
+    { icon:'💼', type:'job',     color:'amber', badge:'ACTIVE',   badgeClass:'--amber',
+      title:'Fake Job Portals — IT Sector',
+      detail:'Scam job portals impersonating major IT firms targeting freshers via WhatsApp.' },
+    { icon:'📱', type:'crypto',  color:'blue',  badge:'MONITOR',  badgeClass:'--blue',
+      title:'Crypto Investment Bot Network',
+      detail:'Automated bot campaign pushing crypto investment scams on social platforms — 500+ accounts.' },
+  ];
+
+  function renderCampaigns() {
+    const cat = document.getElementById('filterCategory').value;
+    let pool = CAMPAIGNS_POOL;
+    if (cat === 'upi')     pool = [CAMPAIGNS_POOL[0], CAMPAIGNS_POOL[3]];
+    else if (cat === 'loan') pool = [CAMPAIGNS_POOL[1], CAMPAIGNS_POOL[4]];
+    else if (cat === 'lottery') pool = [CAMPAIGNS_POOL[2]];
+    else if (cat === 'kyc')    pool = [CAMPAIGNS_POOL[3]];
+    else if (cat === 'job')    pool = [CAMPAIGNS_POOL[4]];
+    else if (cat === 'crypto') pool = [CAMPAIGNS_POOL[5]];
+    else pool = CAMPAIGNS_POOL.slice(0, 4);
+
+    const container = document.getElementById('campaignList');
+    container.innerHTML = '';
+    pool.forEach(c => {
+      const div = document.createElement('div');
+      div.className = `campaign-item${c.color ? ' campaign-item--'+c.color : ''}`;
+      div.innerHTML = `
+        <div class="campaign-item__icon">${c.icon}</div>
+        <div class="campaign-item__body">
+          <div class="campaign-item__title">${c.title}</div>
+          <div class="campaign-item__detail">${c.detail}</div>
+        </div>
+        <span class="campaign-item__badge campaign-item__badge${c.badgeClass}">${c.badge}</span>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  // ── Charts ───────────────────────────────────────────────────
+  let donutChart = null;
+  let trendChart = null;
+
+  const CHART_COLORS = [
+    '#E63946', '#1D84FF', '#F59E0B', '#10B981', '#8B5CF6', '#FB923C'
+  ];
+
+  function getDonutData(catFilter) {
+    const base = {
+      'UPI Scam':    34, 'KYC Scam': 18, 'Crypto Scam': 12,
+      'Loan Scam':   10, 'Lottery Scam': 15, 'Job Fraud': 11
+    };
+    if (catFilter === 'all') return base;
+    // emphasise filtered category
+    const catMap = {
+      upi:'UPI Scam', kyc:'KYC Scam', crypto:'Crypto Scam',
+      loan:'Loan Scam', lottery:'Lottery Scam', job:'Job Fraud'
+    };
+    const focus = catMap[catFilter];
+    if (!focus) return base;
+    const result = {};
+    Object.entries(base).forEach(([k,v]) => {
+      result[k] = k === focus ? Math.min(65, Math.round(v * 1.8)) : Math.max(3, Math.round(v * 0.45));
+    });
+    return result;
+  }
+
+  function buildDonutChart() {
+    const cat = document.getElementById('filterCategory').value;
+    const data = getDonutData(cat);
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    if (donutChart) donutChart.destroy();
+    const ctx = document.getElementById('donutChart').getContext('2d');
+    donutChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels,
+        datasets: [{
+          data: values,
+          backgroundColor: CHART_COLORS,
+          borderColor: '#FFFFFF',
+          borderWidth: 2,
+          hoverOffset: 8
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '62%',
+        animation: { animateRotate: true, duration: 800 },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { family: "'DM Sans', sans-serif", size: 11 },
+              color: '#5A6478', padding: 10, boxWidth: 10
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.label}: ${ctx.parsed}%`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  function getTrendData(days) {
+    const months = parseInt(days) <= 30 ? 7 : parseInt(days) <= 180 ? 8 : 12;
+    const allMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const labels = allMonths.slice(0, months);
+    // Rising trend with noise
+    const base = [1200,1450,1320,1680,1920,2250,2480,2820,3100,3450,3820,4200];
+    const values = base.slice(0, months).map(v => v + Math.round((Math.random()-0.5) * 200));
+    return { labels, values };
+  }
+
+  function buildTrendChart() {
+    const days = document.getElementById('filterTime').value;
+    const { labels, values } = getTrendData(days);
+
+    if (trendChart) trendChart.destroy();
+    const ctx = document.getElementById('trendChart').getContext('2d');
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(230,57,70,0.25)');
+    gradient.addColorStop(1, 'rgba(230,57,70,0.01)');
+
+    trendChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Fraud Reports',
+          data: values,
+          borderColor: '#E63946',
+          backgroundColor: gradient,
+          borderWidth: 2.5,
+          pointBackgroundColor: '#E63946',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 900 },
+        scales: {
+          x: {
+            grid: { color: 'rgba(11,31,58,0.06)' },
+            ticks: { font: { family: "'DM Sans', sans-serif", size: 12 }, color: '#5A6478' }
+          },
+          y: {
+            grid: { color: 'rgba(11,31,58,0.06)' },
+            ticks: { font: { family: "'DM Sans', sans-serif", size: 12 }, color: '#5A6478' },
+            beginAtZero: false
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0B1F3A',
+            titleFont: { family: "'Syne', sans-serif", size: 13 },
+            bodyFont:  { family: "'DM Sans', sans-serif", size: 12 },
+            padding: 12,
+            callbacks: {
+              label: ctx => `  Fraud Reports: ${ctx.parsed.y.toLocaleString()}`
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Apply Filters ────────────────────────────────────────────
+  function applyFilters() {
+    const data = getFilteredData();
+    buildMap();
+    updateKPIs(data);
+    renderCampaigns();
+    buildDonutChart();
+    buildTrendChart();
+  }
+
+  // ── Init ─────────────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    applyFilters();
+  });
+  </script>
+
+</body>
+</html>

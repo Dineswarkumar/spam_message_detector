@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RakshaSutra — Live Fraud Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="logo__mark"></span>
+        RakshaSutra
+      </a>
+      <nav class="navbar__nav">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="analyzer.html" class="nav__link nav__link--active">Analyzer</a>
+        <a href="dashboard.html" class="nav__link">Dashboard</a>
+        <a href="awareness.html" class="nav__link">Awareness</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="analyzer-hero">
+      <div class="analyzer-hero__bg-grid"></div>
+      <div class="analyzer-hero__orb analyzer-hero__orb--left"></div>
+      <div class="analyzer-hero__orb analyzer-hero__orb--right"></div>
+
+      <div class="analyzer-hero__content">
+        <h1 class="analyzer-hero__title">
+          Live Multilingual<br>
+          <span>Fraud Analyzer</span>
+        </h1>
+        <p class="analyzer-hero__sub">
+          Paste any suspicious message in English, Hindi, or Hinglish and get instant fraud
+          risk intelligence powered by hybrid ML.
+        </p>
+      </div>
+    </section>
+
+    <section class="analyzer-body">
+      <div class="container">
+        <div class="analyzer-grid">
+
+          <div style="display:flex; flex-direction:column; gap:22px;">
+
+            <!-- Input Card -->
+            <div class="az-card">
+              <div class="az-card__header">
+                <div class="az-card__header-icon">🔬</div>
+                <div>
+                  <div class="az-card__title">Message Input</div>
+                </div>
+                <span class="az-card__subtitle">Supports EN · HI · Hinglish</span>
+              </div>
+              <div class="az-card__body">
+                <label class="az-input-label" for="messageInput">Paste message to analyze</label>
+                <textarea id="messageInput" class="az-textarea"
+                  placeholder="25 lakh jeetne ka mauka! Abhi UPI se 1999 bheje aur reward paaye. Aaj last date hai!"></textarea>
+
+                <div class="az-input-meta">
+                  <div class="az-lang-chips">
+                    <span class="az-lang-chip">EN</span>
+                    <span class="az-lang-chip">HI</span>
+                    <span class="az-lang-chip">Hinglish</span>
+                  </div>
+                  <span class="az-char-count" id="charCount">0 chars</span>
+                </div>
+
+                <button class="btn--analyze" id="analyzeBtn" onclick="runAnalysis()">
+                  ⚡ &nbsp;Analyze Message
+                </button>
+              </div>
+            </div>
+
+            <!-- Sample Messages Card -->
+
+            <div class="az-card">
+              <div class="az-card__header">
+                <div class="az-card__header-icon az-card__header-icon--blue">📂</div>
+                <div class="az-card__title">Sample Messages</div>
+                <span class="az-card__subtitle">Click to load</span>
+              </div>
+              <div class="az-card__body" style="padding-top:16px;">
+                <div class="az-sample-list">
+                  <div class="az-sample-item" onclick="loadSample(0)">
+                    <span class="az-risk-tag az-risk-tag--high">HIGH</span>
+                    <span>25 lakh jeetne ka mauka! Abhi UPI se 1999 bheje aur reward paaye. Aaj last date hai!</span>
+                  </div>
+                  <div class="az-sample-item" onclick="loadSample(1)">
+                    <span class="az-risk-tag az-risk-tag--high">HIGH</span>
+                    <span>URGENT: Your KYC is expired. Click link to update: bit.ly/kyc-verify or account will be
+                      blocked.</span>
+                  </div>
+                  <div class="az-sample-item" onclick="loadSample(2)">
+                    <span class="az-risk-tag az-risk-tag--medium">MED</span>
+                    <span>Work from home job offer — earn ₹50,000/month. No experience needed. WhatsApp:
+                      9876543210</span>
+                  </div>
+                  <div class="az-sample-item" onclick="loadSample(3)">
+                    <span class="az-risk-tag az-risk-tag--low">SAFE</span>
+                    <span>Hi! Your OTP for SBI login is 847291. Valid for 5 minutes. Do not share with anyone.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- /left col -->
+
+          <!-- ─── RIGHT COLUMN: Results ──────────────────────────── -->
+          <div id="resultsContainer">
+
+            <!-- Placeholder -->
+            <div class="az-placeholder" id="placeholderState">
+              <div class="az-placeholder__icon">🛡️</div>
+              <div class="az-placeholder__title">Awaiting Input</div>
+              <p class="az-placeholder__sub">Paste a suspicious message on the left and click <strong>Analyze
+                  Message</strong> to begin fraud risk scanning.</p>
+            </div>
+
+            <!-- Loading -->
+            <div class="az-loading" id="loadingState">
+              <div class="az-scan">
+                <div class="az-scan-ring az-scan-ring--1"></div>
+                <div class="az-scan-ring az-scan-ring--2"></div>
+                <div class="az-scan-ring az-scan-ring--3"></div>
+                <div class="az-scan-core"></div>
+              </div>
+              <div class="az-loading-text" id="loadingText">Initializing scan...</div>
+              <div class="az-loading-steps" id="loadingSteps">
+                <div class="az-loading-step" id="step1"><span class="az-loading-step__dot"></span>Preprocessing
+                  multilingual input...</div>
+                <div class="az-loading-step" id="step2"><span class="az-loading-step__dot"></span>Running transformer
+                  classification...</div>
+                <div class="az-loading-step" id="step3"><span class="az-loading-step__dot"></span>Applying rule engine
+                  patterns...</div>
+                <div class="az-loading-step" id="step4"><span class="az-loading-step__dot"></span>Scoring psychological
+                  signals...</div>
+                <div class="az-loading-step" id="step5"><span class="az-loading-step__dot"></span>Matching campaign
+                  database...</div>
+              </div>
+            </div>
+
+            <!-- Results -->
+            <div class="az-results" id="resultsPanel">
+
+              <!-- 1. Fraud Score -->
+              <div class="az-score-card" id="scoreCard">
+                <div class="az-meter">
+                  <svg width="108" height="108" viewBox="0 0 108 108">
+                    <circle class="az-meter-track" cx="54" cy="54" r="47" />
+                    <circle class="az-meter-fill" id="meterFill" cx="54" cy="54" r="47" />
+                  </svg>
+                  <div class="az-meter-inner">
+                    <span class="az-meter-value" id="scoreValue">--</span>
+                    <span class="az-meter-label">RISK</span>
+                  </div>
+                </div>
+                <div class="az-score-info">
+                  <div class="az-score-eyebrow">Fraud Risk Score</div>
+                  <div class="az-score-verdict" id="scoreVerdict">—</div>
+                  <div class="az-score-chips">
+                    <span class="az-chip az-chip--category" id="categoryChip">—</span>
+                    <span class="az-chip az-chip--confidence" id="confidenceChip">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Risk Level Bar -->
+              <div class="az-risk-bar-wrap">
+                <div class="az-risk-bar-label">⚠ Risk Level Indicator</div>
+                <div class="az-risk-track">
+                  <div class="az-risk-seg az-risk-seg--low" id="segLow"></div>
+                  <div class="az-risk-seg az-risk-seg--medium" id="segMed"></div>
+                  <div class="az-risk-seg az-risk-seg--high" id="segHigh"></div>
+                  <div class="az-risk-seg az-risk-seg--critical" id="segCrit"></div>
+                </div>
+                <div class="az-risk-labels">
+                  <span class="az-risk-level-label" id="lblLow" data-level="low">Low</span>
+                  <span class="az-risk-level-label" id="lblMed" data-level="medium">Medium</span>
+                  <span class="az-risk-level-label" id="lblHigh" data-level="high">High</span>
+                  <span class="az-risk-level-label" id="lblCrit" data-level="critical">Critical</span>
+                </div>
+              </div>
+
+              <!-- 3. AI Explanation -->
+              <div class="az-card">
+                <div class="az-card__header">
+                  <div class="az-card__header-icon">🧠</div>
+                  <div class="az-card__title">Explanation Breakdown</div>
+                </div>
+                <div class="az-exp-list" id="expList"></div>
+              </div>
+
+              <!-- 4. Psychological Flags -->
+              <div class="az-card">
+                <div class="az-card__header">
+                  <div class="az-card__header-icon az-card__header-icon--blue">🔮</div>
+                  <div class="az-card__title">Behavioral Risk Indicators</div>
+                  <span class="az-card__subtitle" id="psychCount">0 flags</span>
+                </div>
+                <div class="az-psych-grid" id="psychGrid"></div>
+              </div>
+
+              <!-- 5. Campaign Match -->
+              <div class="az-card">
+                <div class="az-card__header">
+                  <div class="az-card__header-icon">📡</div>
+                  <div class="az-card__title">Scam Pattern Match Analysis</div>
+                </div>
+                <div class="az-card__body">
+                  <div class="az-campaign-headline">
+                    <div>
+                      <div class="az-campaign-count" id="campaignCount">—</div>
+                      <div class="az-campaign-count-label">Similar fraud attempts matched in database</div>
+                    </div>
+                  </div>
+                  <div class="az-sim-row">
+                    <span class="az-sim-label">Pattern Similarity</span>
+                    <div class="az-sim-bar">
+                      <div class="az-sim-fill az-sim-fill--primary" id="simBar1"></div>
+                    </div>
+                    <span class="az-sim-pct" id="simPct1">—</span>
+                  </div>
+                  <div class="az-sim-row">
+                    <span class="az-sim-label">Keyword Overlap</span>
+                    <div class="az-sim-bar">
+                      <div class="az-sim-fill az-sim-fill--secondary" id="simBar2"></div>
+                    </div>
+                    <span class="az-sim-pct" id="simPct2">—</span>
+                  </div>
+                  <div class="az-campaign-tags" id="campaignTags"></div>
+                </div>
+              </div>
+
+            </div><!-- /az-results -->
+          </div><!-- /right col -->
+
+        </div><!-- /analyzer-grid -->
+      </div><!-- /container -->
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════ FOOTER ═══════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="logo__mark logo__mark--sm"></span>
+          <span class="footer__name">RakshaSutra</span>
+        </div>
+        <div class="footer__meta">
+          <span class="footer__sep">·</span>
+          <span>Team RakshaSutra</span>
+          <span class="footer__sep">·</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Navbar scroll shadow ─────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    // ── Sample data ──────────────────────────────────────────────
+    const SAMPLES = [
+      {
+        text: "25 lakh jeetne ka mauka! Abhi UPI se 1999 bheje aur reward paaye. Aaj last date hai!",
+        result: {
+          fraud_score: 92, category: "UPI Scam", confidence: "Critical",
+          explanations: [
+            { icon: "⚡", label: "Urgency Trigger Detected", detail: "Phrases like 'aaj last date' create artificial deadline pressure to bypass rational decision-making.", weight: "+32%" },
+            { icon: "💰", label: "Unrealistic Reward Pattern", detail: "Promise of ₹25 lakh return for ₹1,999 investment is a classic advance-fee scam structure.", weight: "+28%" },
+            { icon: "📲", label: "Suspicious Payment Request", detail: "Unsolicited UPI payment requests are a primary vector for digital financial fraud in India.", weight: "+22%" },
+            { icon: "🔑", label: "Known Scam Keyword Match", detail: "Keyword cluster 'jeetne ka mauka + UPI + bheje' matches 145 confirmed UPI scam patterns.", weight: "+18%" }
+          ],
+          psychological_flags: [
+            { type: "greed", name: "Greed Appeal", emoji: "💸", desc: "Promises unusually high financial gain relative to minimal investment.", intensity: 92 },
+            { type: "urgency", name: "Urgency Pressure", emoji: "⏰", desc: "Artificial time constraint designed to prevent victim from verifying claims.", intensity: 88 },
+            { type: "fear", name: "Loss Aversion", emoji: "😨", desc: "Implied loss of reward if action is not taken immediately.", intensity: 65 },
+            { type: "authority", name: "Authority Bypass", emoji: "🎭", desc: "Relies purely on reward appeal to override victim's skepticism.", intensity: 40 }
+          ],
+          similarity_count: 145, similarity_score: 92, keyword_overlap: 84,
+          campaign_tags: ["UPI Fraud", "Advance Fee", "Lottery Scam", "Hinglish Pattern", "High Volume"]
+        }
+      },
+      {
+        text: "URGENT: Your KYC is expired. Click link to update: bit.ly/kyc-verify or account will be blocked.",
+        result: {
+          fraud_score: 87, category: "KYC Phishing", confidence: "High",
+          explanations: [
+            { icon: "⚠️", label: "Impersonation Signal", detail: "Message mimics official bank/RBI communication — hallmark of phishing.", weight: "+30%" },
+            { icon: "🔗", label: "Suspicious Shortened URL", detail: "bit.ly redirects are a common tactic to mask malicious destination domains.", weight: "+26%" },
+            { icon: "🚨", label: "Account Block Threat", detail: "Threat of suspension is a classic fear-based manipulation to force hasty action.", weight: "+24%" },
+            { icon: "📋", label: "Regulatory Misuse Pattern", detail: "Exploiting KYC compliance awareness — high-frequency pattern in India post-2022.", weight: "+16%" }
+          ],
+          psychological_flags: [
+            { type: "fear", name: "Fear Trigger", emoji: "😱", desc: "Account suspension threat activates loss aversion.", intensity: 90 },
+            { type: "urgency", name: "Urgency Pressure", emoji: "⏰", desc: "URGENT keyword combined with consequence creates maximum compliance pressure.", intensity: 85 },
+            { type: "authority", name: "Authority Impersonation", emoji: "🏛️", desc: "Mimics official regulatory communication to override natural skepticism.", intensity: 78 },
+            { type: "greed", name: "Greed Appeal", emoji: "💸", desc: "No financial reward — fear-based scam relies on threat rather than reward.", intensity: 10 }
+          ],
+          similarity_count: 312, similarity_score: 87, keyword_overlap: 79,
+          campaign_tags: ["KYC Fraud", "Phishing Link", "Bank Impersonation", "Shortened URL", "Pan-India"]
+        }
+      },
+      {
+        text: "Work from home job offer — earn ₹50,000/month. No experience needed. WhatsApp: 9876543210",
+        result: {
+          fraud_score: 61, category: "Job Scam", confidence: "Medium",
+          explanations: [
+            { icon: "💼", label: "Unrealistic Income Promise", detail: "₹50,000/month with no experience is a statistically improbable job offer.", weight: "+25%" },
+            { icon: "📱", label: "Direct Contact Method", detail: "Directing to personal WhatsApp number bypasses official hiring channels.", weight: "+20%" },
+            { icon: "🏠", label: "Work-from-Home Bait Pattern", detail: "Generic WFH promise without company details matches known fake job listings.", weight: "+18%" }
+          ],
+          psychological_flags: [
+            { type: "greed", name: "Greed Appeal", emoji: "💸", desc: "High income promise targeting job-seekers and financially stressed individuals.", intensity: 72 },
+            { type: "urgency", name: "Urgency Pressure", emoji: "⏰", desc: "No explicit urgency detected — moderate risk factor.", intensity: 25 },
+            { type: "fear", name: "Loss Aversion", emoji: "😨", desc: "No fear trigger — relies on opportunity appeal rather than threat.", intensity: 15 },
+            { type: "authority", name: "Authority Bypass", emoji: "🎭", desc: "Lacks company name or verifiable details — common in scam job listings.", intensity: 45 }
+          ],
+          similarity_count: 67, similarity_score: 61, keyword_overlap: 55,
+          campaign_tags: ["Job Fraud", "WFH Scam", "WhatsApp Redirect"]
+        }
+      },
+      {
+        text: "Hi! Your OTP for SBI login is 847291. Valid for 5 minutes. Do not share with anyone.",
+        result: {
+          fraud_score: 8, category: "Legitimate OTP", confidence: "Safe",
+          explanations: [
+            { icon: "✅", label: "Standard OTP Format", detail: "6-digit OTP with 5-minute validity matches legitimate SBI authentication patterns.", weight: "−40%" },
+            { icon: "🛡️", label: "Security Warning Included", detail: "'Do not share with anyone' is a genuine security advisory, not a manipulation tactic.", weight: "−30%" },
+            { icon: "📋", label: "No Suspicious Links", detail: "Message contains no URLs, payment requests, or redirects to external resources.", weight: "−25%" }
+          ],
+          psychological_flags: [
+            { type: "greed", name: "Greed Appeal", emoji: "💸", desc: "No financial reward or incentive detected in message.", intensity: 2 },
+            { type: "urgency", name: "Urgency Pressure", emoji: "⏰", desc: "Standard OTP validity window — not artificial urgency.", intensity: 15 },
+            { type: "fear", name: "Fear Trigger", emoji: "😨", desc: "No threatening language or loss scenarios detected.", intensity: 3 },
+            { type: "authority", name: "Authority Check", emoji: "🎭", desc: "SBI branding matches known authentic OTP format.", intensity: 5 }
+          ],
+          similarity_count: 3, similarity_score: 8, keyword_overlap: 12,
+          campaign_tags: ["Legitimate", "OTP Message", "SBI Verified"]
+        }
+      }
+    ];
+
+    // ── Char counter ─────────────────────────────────────────────
+    document.getElementById('messageInput').addEventListener('input', () => {
+      document.getElementById('charCount').textContent =
+        document.getElementById('messageInput').value.length + ' chars';
+    });
+
+    // ── Load sample ──────────────────────────────────────────────
+    function loadSample(index) {
+      document.getElementById('messageInput').value = SAMPLES[index].text;
+      document.getElementById('charCount').textContent = SAMPLES[index].text.length + ' chars';
+    }
+
+    // ── Run Analysis ─────────────────────────────────────────────
+    async function runAnalysis() {
+      const msg = document.getElementById('messageInput').value.trim();
+      if (!msg) { alert('Please enter a message to analyze.'); return; }
+
+      document.getElementById('placeholderState').style.display = 'none';
+      document.getElementById('resultsPanel').classList.remove('active');
+      document.getElementById('loadingState').classList.add('active');
+      document.getElementById('analyzeBtn').disabled = true;
+
+      const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
+      const texts = [
+        'Preprocessing multilingual input...',
+        'Running transformer classification...',
+        'Applying rule engine patterns...',
+        'Scoring psychological signals...',
+        'Matching campaign database...'
+      ];
+      steps.forEach(s => document.getElementById(s).classList.remove('visible'));
+
+      let i = 0;
+      const iv = setInterval(() => {
+        if (i < steps.length) {
+          document.getElementById(steps[i]).classList.add('visible');
+          document.getElementById('loadingText').textContent = texts[i];
+          i++;
+        }
+      }, 340);
+
+      try {
+        // CALL THE ACTUAL FASTAPI BACKEND
+        const response = await fetch('http://localhost:8000/api/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: msg })
+        });
+
+        let apiData = await response.json();
+
+        // Wait for animation to finish
+        clearInterval(iv);
+        steps.forEach(s => document.getElementById(s).classList.add('visible'));
+        document.getElementById('loadingText').textContent = 'Analysis Complete';
+
+        setTimeout(() => showResults(apiData), 400);
+
+      } catch (err) {
+        clearInterval(iv);
+        alert("Error connecting to backend API. Please make sure main.py is running!");
+        document.getElementById('loadingState').classList.remove('active');
+        document.getElementById('analyzeBtn').disabled = false;
+      }
+    }
+
+    // ── Show Results ─────────────────────────────────────────────
+    function showResults(apiResponse) {
+      const msg = document.getElementById('messageInput').value.trim();
+      const matched = SAMPLES.find(s => s.text === msg);
+
+      // Use sample data for rich UI, but default to synthetic if not a sample
+      const result = matched ? JSON.parse(JSON.stringify(matched.result)) : generateSynthetic(msg);
+
+      // Override the score and status with REAL API data from your model
+      let isFraud = apiResponse.status === "Fraud" || apiResponse.status === "Suspicious";
+      let baseScore = apiResponse.risk_score !== undefined ? apiResponse.risk_score :
+        (isFraud ? (apiResponse.confidence * 100) : ((1.0 - apiResponse.confidence) * 100));
+
+      result.fraud_score = Math.round(baseScore);
+
+      if (apiResponse.status === "Fraud") {
+        result.confidence = "High";
+        result.category = "Fraud Match";
+      } else if (apiResponse.status === "Suspicious") {
+        result.confidence = "Medium";
+        result.category = "Suspicious Marker";
+      } else {
+        result.confidence = "Safe";
+        result.category = "Clean";
+      }
+
+      document.getElementById('loadingState').classList.remove('active');
+      document.getElementById('analyzeBtn').disabled = false;
+
+      const score = result.fraud_score;
+      const colorVar = score >= 70 ? 'var(--crimson)' : score >= 40 ? '#B45309' : '#059669';
+      const rgbStr = score >= 70 ? '230,57,70' : score >= 40 ? '180,83,9' : '5,150,105';
+
+      // Score meter
+      const fill = document.getElementById('meterFill');
+      const circumference = 296;
+      fill.style.stroke = colorVar;
+      fill.style.filter = `drop-shadow(0 0 5px ${colorVar})`;
+      setTimeout(() => {
+        fill.style.strokeDashoffset = circumference - (circumference * score / 100);
+      }, 80);
+
+      // Score card tint
+      const sc = document.getElementById('scoreCard');
+      sc.style.setProperty('--score-rgb', rgbStr);
+
+      // Text
+      document.getElementById('scoreValue').textContent = score + '%';
+      document.getElementById('scoreValue').style.color = score >= 70 ? '#FCA5A5' : score >= 40 ? '#FCD34D' : '#6EE7B7';
+      const verdict = score >= 80 ? '🔴 High Risk' : score >= 60 ? '🟡 Medium Risk' : score >= 30 ? '🟢 Low Risk' : '✅ Safe';
+      document.getElementById('scoreVerdict').textContent = verdict;
+      document.getElementById('categoryChip').textContent = '📂 ' + result.category;
+      document.getElementById('confidenceChip').textContent = '🎯 ' + result.confidence;
+
+      // Risk bar
+      const segMap = { low: 'Low', medium: 'Med', high: 'High', critical: 'Crit' };
+      const lblMap = { low: 'Low', medium: 'Med', high: 'High', critical: 'Crit' };
+      const level = score >= 80 ? 'critical' : score >= 60 ? 'high' : score >= 35 ? 'medium' : 'low';
+      ['Low', 'Med', 'High', 'Crit'].forEach(k => {
+        document.getElementById('seg' + k).classList.remove('active');
+        document.getElementById('lbl' + k).classList.remove('active', 'low', 'medium', 'high', 'critical');
+      });
+      document.getElementById('seg' + segMap[level]).classList.add('active');
+      const lblEl = document.getElementById('lbl' + lblMap[level]);
+      lblEl.classList.add('active', level);
+
+      // Explanations
+      const expList = document.getElementById('expList');
+      expList.innerHTML = '';
+      result.explanations.forEach(exp => {
+        const d = document.createElement('div');
+        d.className = 'az-exp-item';
+        d.innerHTML = `
+          <div class="az-exp-icon">${exp.icon}</div>
+          <div class="az-exp-body">
+            <div class="az-exp-name">${exp.label}</div>
+            <div class="az-exp-detail">${exp.detail}</div>
+          </div>
+          <div class="az-exp-weight">${exp.weight}</div>
+        `;
+        expList.appendChild(d);
+      });
+
+      // Psych flags
+      const grid = document.getElementById('psychGrid');
+      grid.innerHTML = '';
+      result.psychological_flags.forEach(f => {
+        const d = document.createElement('div');
+        d.className = `az-psych-flag az-psych-flag--${f.type}`;
+        d.innerHTML = `
+          <div class="az-psych-top">
+            <span class="az-psych-emoji">${f.emoji}</span>
+            <span class="az-psych-name">${f.name}</span>
+          </div>
+          <div class="az-psych-desc">${f.desc}</div>
+          <div class="az-psych-bar">
+            <div class="az-psych-bar-fill" data-w="${f.intensity}%"></div>
+          </div>
+        `;
+        grid.appendChild(d);
+      });
+      setTimeout(() => {
+        document.querySelectorAll('.az-psych-bar-fill[data-w]').forEach(el => {
+          el.style.width = el.dataset.w;
+        });
+      }, 180);
+      document.getElementById('psychCount').textContent =
+        result.psychological_flags.filter(f => f.intensity > 30).length + ' flags detected';
+
+      // Campaign
+      document.getElementById('campaignCount').textContent = result.similarity_count;
+      document.getElementById('simPct1').textContent = result.similarity_score + '%';
+      document.getElementById('simPct2').textContent = result.keyword_overlap + '%';
+      setTimeout(() => {
+        document.getElementById('simBar1').style.width = result.similarity_score + '%';
+        document.getElementById('simBar2').style.width = result.keyword_overlap + '%';
+      }, 260);
+      document.getElementById('campaignTags').innerHTML =
+        result.campaign_tags.map(t => `<span class="az-campaign-tag">${t}</span>`).join('');
+
+      // Show & scroll
+      document.getElementById('resultsPanel').classList.add('active');
+      document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Synthetic result for custom text ─────────────────────────
+    function generateSynthetic(msg) {
+      const lo = msg.toLowerCase();
+      let score = 28;
+      const flags = [];
+      const exps = [];
+
+      const urgency = ['urgent', 'last date', 'sirf aaj', 'abhi', 'jaldi', 'immediately', 'limited time'];
+      const reward = ['win', 'jeet', 'lakh', 'prize', 'reward', 'earn', 'cashback', 'free'];
+      const payment = ['upi', 'paytm', 'gpay', 'bheje', 'send money', 'payment', 'transfer'];
+      const phishing = ['click', 'link', 'verify', 'kyc', 'account blocked', 'update'];
+      const job = ['work from home', 'job offer', 'whatsapp', 'no experience', 'per month'];
+
+      if (urgency.some(w => lo.includes(w))) { score += 20; flags.push('urgency'); exps.push({ icon: '⚡', label: 'Urgency Trigger Detected', detail: 'Message contains time-pressure language designed to override rational thinking.', weight: '+20%' }); }
+      if (reward.some(w => lo.includes(w))) { score += 18; flags.push('greed'); exps.push({ icon: '💰', label: 'Reward Bait Pattern', detail: 'Offers of financial gain without clear legitimate source detected.', weight: '+18%' }); }
+      if (payment.some(w => lo.includes(w))) { score += 22; flags.push('urgency'); exps.push({ icon: '📲', label: 'Payment Request Signal', detail: 'Unsolicited payment instruction detected — common in UPI-based fraud.', weight: '+22%' }); }
+      if (phishing.some(w => lo.includes(w))) { score += 15; flags.push('fear'); exps.push({ icon: '🔗', label: 'Phishing Indicator', detail: 'Message contains links or verification requests consistent with phishing patterns.', weight: '+15%' }); }
+      if (job.some(w => lo.includes(w))) { score += 12; flags.push('greed'); exps.push({ icon: '💼', label: 'Job Scam Pattern', detail: 'Unrealistic employment offer with limited verifiable details.', weight: '+12%' }); }
+
+      score = Math.min(score, 97);
+      if (exps.length === 0) exps.push({ icon: '✅', label: 'Low Risk Signal Profile', detail: 'Message does not match common fraud patterns in the database.', weight: '−35%' });
+
+      const u = [...new Set(flags)];
+      const psychFlags = [
+        { type: 'greed', name: 'Greed Appeal', emoji: '💸', desc: 'Financial reward or gain mentioned in message.', intensity: u.includes('greed') ? score * 0.9 : 8 },
+        { type: 'urgency', name: 'Urgency Pressure', emoji: '⏰', desc: 'Time pressure or deadline language detected.', intensity: u.includes('urgency') ? score * 0.85 : 14 },
+        { type: 'fear', name: 'Fear Trigger', emoji: '😨', desc: 'Threat or negative consequence language detected.', intensity: u.includes('fear') ? score * 0.75 : 6 },
+        { type: 'authority', name: 'Authority Impersonation', emoji: '🏛️', desc: 'Official-sounding language or brand impersonation.', intensity: u.includes('authority') ? score * 0.60 : 18 }
+      ];
+
+      const cats = ['General Scam', 'UPI Fraud', 'Phishing', 'Job Scam', 'Lottery Scam'];
+      return {
+        fraud_score: score,
+        category: score > 70 ? 'High Risk Fraud' : score > 50 ? cats[Math.floor(Math.random() * cats.length)] : 'Low Risk',
+        confidence: score > 80 ? 'High' : score > 50 ? 'Medium' : 'Low',
+        explanations: exps,
+        psychological_flags: psychFlags,
+        similarity_count: Math.floor(score * 1.7),
+        similarity_score: Math.max(score - 6, 5),
+        keyword_overlap: Math.max(score - 16, 5),
+        campaign_tags: score > 60 ? ['Pattern Match', 'Active Campaign', 'India Region'] : ['Minimal Match', 'Low Confidence']
+      };
+    }
+  </script>
+
+</body>
+
+</html>

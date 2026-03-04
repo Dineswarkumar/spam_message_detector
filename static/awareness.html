@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RakshaSutra — Fraud Awareness & Protection Guide</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════
+       AWARENESS PAGE — Extension styles only.
+       All base resets, variables, navbar, footer, typography, cards,
+       .section, .container, .btn come from style.css.
+    ═══════════════════════════════════════════════════════════════ */
+
+    /* ── Navbar scrolled shadow (shared behaviour) ───────────── */
+    .navbar.scrolled { box-shadow: var(--shadow-nav); }
+
+    /* ── Page Hero ───────────────────────────────────────────── */
+    .aw-hero {
+      background: var(--navy);
+      padding: 72px 32px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .aw-hero__grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(29,132,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29,132,255,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+    }
+    /* Calm blue/teal orbs — no red on this page */
+    .aw-hero__orb {
+      position: absolute; border-radius: 50%;
+      filter: blur(80px); pointer-events: none;
+    }
+    .aw-hero__orb--l {
+      width: 380px; height: 380px;
+      background: radial-gradient(circle, rgba(29,132,255,0.12) 0%, transparent 70%);
+      top: -100px; left: -60px;
+    }
+    .aw-hero__orb--r {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%);
+      bottom: -130px; right: -70px;
+    }
+    .aw-hero__content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+    .aw-hero__badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.1em;
+      text-transform: uppercase; color: rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 14px; border-radius: 100px; margin-bottom: 28px;
+    }
+    .aw-hero__badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #06B6D4; /* cyan — calm, not alarming */
+      animation: aw-pulse 2s ease-in-out infinite;
+    }
+    @keyframes aw-pulse { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:0.5; transform:scale(0.8)} }
+
+    .aw-hero__title {
+      font-family: var(--font-display);
+      font-size: var(--fs-h1);
+      font-weight: 800; color: #fff;
+      letter-spacing: -0.02em; line-height: 1.35; margin-bottom: 16px;
+      padding-bottom: 0.12em;
+    }
+    .aw-hero__title span { color: #60C0E0; } /* calm light-blue accent */
+    .aw-hero__sub {
+      font-size: 1rem; font-weight: 400;
+      color: rgba(255,255,255,0.5); line-height: 2;
+      padding-bottom: 0.4em;
+    }
+
+    /* ── Page Sections ───────────────────────────────────────── */
+    .aw-body { background: var(--bg); padding: 56px 0 96px; }
+
+    /* narrow reading column */
+    .aw-col {
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .aw-section { margin-bottom: 64px; }
+    .aw-section:last-child { margin-bottom: 0; }
+
+    /* ── Emergency Box ───────────────────────────────────────── */
+    .aw-emergency {
+      background: rgba(29, 132, 255, 0.04);
+      border: 1px solid rgba(29, 132, 255, 0.18);
+      border-left: 4px solid var(--electric);
+      border-radius: var(--radius-lg);
+      padding: 24px 24px 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .aw-emergency__top {
+      display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+    }
+    .aw-emergency__icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: var(--electric-dim);
+      border: 1px solid rgba(29,132,255,0.2);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .aw-emergency__heading {
+      font-family: var(--font-display);
+      font-size: 18px; font-weight: 700; color: var(--navy);
+    }
+    .aw-emergency__sub { font-size: 0.95rem; color: var(--muted); margin-top: 2px; }
+
+    .aw-step-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 18px; }
+
+    .aw-step {
+      display: flex; align-items: flex-start; gap: 13px;
+      padding: 12px 16px;
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      transition: box-shadow var(--transition);
+    }
+    .aw-step:hover { box-shadow: var(--shadow-card); }
+
+    .aw-step__num {
+      width: 26px; height: 26px; flex-shrink: 0;
+      background: var(--navy); color: #fff;
+      border-radius: 50%;
+      font-family: var(--font-display);
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+    .aw-step__text { font-size: 1rem; color: var(--charcoal); line-height: 1.7; }
+    .aw-step__text a {
+      color: var(--electric); text-decoration: underline;
+      text-decoration-color: rgba(29,132,255,0.3);
+      text-underline-offset: 2px;
+    }
+    .aw-step__text a:hover { text-decoration-color: var(--electric); }
+    .aw-step__text strong { color: var(--navy); font-weight: 500; }
+
+    .aw-emergency__note {
+      font-size: 0.95rem; color: var(--muted);
+      background: var(--bg);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      border-left: 3px solid rgba(29,132,255,0.3);
+      line-height: 1.6;
+    }
+
+    /* ── Accordion ───────────────────────────────────────────── */
+    .aw-accordion { display: flex; flex-direction: column; gap: 10px; }
+
+    .aw-acc-item {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: box-shadow var(--transition);
+    }
+    .aw-acc-item.open { box-shadow: var(--shadow-card-hover); }
+
+    .aw-acc-trigger {
+      width: 100%; background: none; border: none; cursor: pointer;
+      padding: 18px 22px;
+      display: flex; align-items: center; gap: 14px;
+      text-align: left;
+      transition: background var(--transition);
+    }
+    .aw-acc-trigger:hover { background: var(--bg); }
+    .aw-acc-item.open .aw-acc-trigger { background: var(--bg); }
+
+    .aw-acc-cat-icon {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+    }
+    .aw-acc-cat-icon--upi     { background: var(--crimson-dim); }
+    .aw-acc-cat-icon--lottery { background: rgba(245,158,11,0.1); }
+    .aw-acc-cat-icon--job     { background: rgba(29,132,255,0.1); }
+    .aw-acc-cat-icon--invest  { background: rgba(139,92,246,0.1); }
+    .aw-acc-cat-icon--kyc     { background: rgba(16,185,129,0.1); }
+
+    .aw-acc-label { flex: 1; }
+    .aw-acc-title {
+      font-family: var(--font-display);
+      font-size: 1rem; font-weight: 700; color: var(--navy);
+      margin-bottom: 2px;
+      line-height: 1.22;
+    }
+    .aw-acc-tagline { font-size: 0.9rem; color: var(--muted); }
+
+    .aw-acc-arrow {
+      font-size: 13px; color: var(--muted); flex-shrink: 0;
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+      line-height: 1;
+    }
+    .aw-acc-item.open .aw-acc-arrow { transform: rotate(180deg); }
+
+    .aw-acc-body {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.38s cubic-bezier(0.4,0,0.2,1);
+    }
+    .aw-acc-item.open .aw-acc-body { max-height: 1000px; }
+
+    .aw-acc-inner {
+      padding: 0 22px 22px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding-top: 18px;
+    }
+
+    .aw-acc-description {
+      grid-column: 1 / -1;
+      font-size: 1rem; color: var(--muted); line-height: 1.7;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2px;
+    }
+
+    .aw-acc-col-title {
+      font-size: 11px; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px;
+    }
+
+    .aw-mini-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .aw-mini-list li {
+      font-size: 0.95rem; color: var(--charcoal);
+      line-height: 1.6; padding-left: 18px;
+      position: relative;
+    }
+    .aw-mini-list li::before {
+      content: '›';
+      position: absolute; left: 0;
+      color: var(--electric); font-weight: 700;
+    }
+    .aw-mini-list li.aw-warn::before { content: '!'; color: var(--crimson); }
+    .aw-mini-list li.aw-ok::before   { content: '✓'; color: #059669; }
+
+    .aw-acc-sub-block {
+      background: var(--bg);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+
+    /* span full width for prevention block */
+    .aw-acc-sub-block--full { grid-column: 1 / -1; }
+
+    /* ── Resource Cards ──────────────────────────────────────── */
+    .aw-resource-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+    }
+
+    .aw-resource-card {
+      background: var(--bg-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px 22px;
+      box-shadow: var(--shadow-card);
+      display: flex; align-items: flex-start; gap: 16px;
+      transition: box-shadow var(--transition), transform var(--transition);
+      position: relative; overflow: hidden;
+    }
+    .aw-resource-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--electric), #06B6D4);
+      opacity: 0; transition: opacity var(--transition);
+    }
+    .aw-resource-card:hover {
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-2px);
+    }
+    .aw-resource-card:hover::before { opacity: 1; }
+
+    .aw-resource-icon {
+      width: 44px; height: 44px; flex-shrink: 0;
+      background: var(--electric-dim);
+      border: 1px solid rgba(29,132,255,0.15);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; margin-top: 2px;
+    }
+    .aw-resource-body { flex: 1; }
+    .aw-resource-title {
+      font-family: var(--font-display);
+      font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 4px;
+    }
+    .aw-resource-desc { font-size: 0.95rem; color: var(--muted); margin-bottom: 12px; line-height: 1.55; }
+
+    .aw-resource-links { display: flex; flex-direction: column; gap: 5px; }
+    .aw-resource-link {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 0.95rem; color: var(--electric);
+      font-weight: 500; width: fit-content;
+      transition: gap var(--transition), color var(--transition);
+    }
+    .aw-resource-link:hover { gap: 10px; color: var(--navy); }
+    .aw-resource-link__arrow { font-size: 11px; }
+
+    .aw-helpline {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.95rem; color: var(--muted);
+    }
+    .aw-helpline strong { color: var(--navy); font-weight: 600; }
+
+    /* ── Quick Tips strip ────────────────────────────────────── */
+    .aw-tips-strip {
+      background: var(--navy);
+      border-radius: var(--radius-lg);
+      padding: 28px 28px;
+      margin-bottom: 64px;
+      position: relative; overflow: hidden;
+    }
+    .aw-tips-strip::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(29,132,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(29,132,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .aw-tips-strip__inner { position: relative; z-index: 1; }
+    .aw-tips-strip__label {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 8px;
+    }
+    .aw-tips-strip__title {
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 700; color: #fff;
+      margin-bottom: 20px;
+    }
+    .aw-tips-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .aw-tip {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex; align-items: flex-start; gap: 10px;
+      transition: background var(--transition);
+    }
+    .aw-tip:hover { background: rgba(255,255,255,0.08); }
+    .aw-tip__emoji { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .aw-tip__text { font-size: 0.95rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+    .aw-tip__text strong { color: #fff; display: block; margin-bottom: 2px; font-weight: 600; }
+
+    /* ── Responsive ──────────────────────────────────────────── */
+    @media (max-width: 760px) {
+      .aw-hero { padding: 56px 20px 44px; }
+      .aw-body  { padding: 36px 0 64px; }
+      .aw-acc-inner { grid-template-columns: 1fr; }
+      .aw-acc-sub-block--full { grid-column: 1; }
+      .aw-resource-grid { grid-template-columns: 1fr; }
+      .aw-tips-grid { grid-template-columns: 1fr 1fr; }
+      .aw-emergency { padding: 20px 18px; }
+    }
+    @media (max-width: 480px) {
+      .aw-tips-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════ NAVBAR ══════════════════════════════ -->
+  <header class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <span class="logo__mark"></span>
+        RakshaSutra
+      </a>
+      <nav class="navbar__nav">
+        <a href="index.html"      class="nav__link">Home</a>
+        <a href="analyzer.html"   class="nav__link">Analyzer</a>
+        <a href="dashboard.html"  class="nav__link">Dashboard</a>
+        <a href="awareness.html"  class="nav__link nav__link--active">Awareness</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ═══════════════════════════ HERO ════════════════════════════════ -->
+    <section class="aw-hero">
+      <div class="aw-hero__grid"></div>
+      <div class="aw-hero__orb aw-hero__orb--l"></div>
+      <div class="aw-hero__orb aw-hero__orb--r"></div>
+      <div class="aw-hero__content">
+        <h1 class="aw-hero__title">
+          Fraud Awareness &amp;<br><span>Protection Guide</span>
+        </h1>
+        <p class="aw-hero__sub">
+          Learn how to identify, prevent, and respond to digital fraud attempts in a calm
+          and informed manner. Knowledge is your strongest defence.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════ BODY ════════════════════════════════ -->
+    <div class="aw-body">
+      <div class="container">
+        <div class="aw-col">
+
+          <!-- ── Quick Tips ──────────────────────────────────── -->
+          <div class="aw-tips-strip">
+            <div class="aw-tips-strip__inner">
+              <div class="aw-tips-strip__label">Always Remember</div>
+              <div class="aw-tips-strip__title">Six Universal Rules of Digital Safety</div>
+              <div class="aw-tips-grid">
+                <div class="aw-tip">
+                  <span class="aw-tip__emoji">🔒</span>
+                  <div class="aw-tip__text"><strong>Never share OTP or PIN</strong>No legitimate bank, government body, or company will ever ask for this.</div>
+                </div>
+                <div class="aw-tip">
+                  <span class="aw-tip__emoji">📵</span>
+                  <div class="aw-tip__text"><strong>Hang up on pressure</strong>Scammers create urgency. Legitimate institutions allow you time to verify.</div>
+                </div>
+                <div class="aw-tip">
+                  <span class="aw-tip__emoji">🔗</span>
+                  <div class="aw-tip__text"><strong>Verify links manually</strong>Type official website addresses yourself. Do not click links from unknown senders.</div>
+                </div>
+                <div class="aw-tip">
+                  <span class="aw-tip__emoji">💸</span>
+                  <div class="aw-tip__text"><strong>No upfront fees</strong>Legitimate jobs, prizes, and loans never require advance payment.</div>
+                </div>
+                <div class="aw-tip">
+                  <span class="aw-tip__emoji">📸</span>
+                  <div class="aw-tip__text"><strong>Preserve evidence</strong>Screenshot messages, note phone numbers and transaction IDs before blocking.</div>
+                </div>
+                <div class="aw-tip">
+                  <span class="aw-tip__emoji">📞</span>
+                  <div class="aw-tip__text"><strong>Report on 1930</strong>India's National Cyber Crime Helpline. Early reporting improves fund recovery.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECTION 1: Emergency Actions ───────────────── -->
+          <div class="aw-section">
+            <div class="section__label">Immediate Response</div>
+            <h2 class="section__title">If You Have Just Been Targeted</h2>
+            <p class="section__lead" style="margin-bottom: 28px;">
+              If you believe you have been the target of a fraud attempt — whether money was transferred or not — the steps below should be taken as quickly as possible.
+            </p>
+
+            <div class="aw-emergency">
+              <div class="aw-emergency__top">
+                <div class="aw-emergency__icon">🛡️</div>
+                <div>
+                  <div class="aw-emergency__heading">Immediate Action Checklist</div>
+                  <div class="aw-emergency__sub">Follow these steps in order. Stay calm — rapid action matters most.</div>
+                </div>
+              </div>
+
+              <div class="aw-step-list">
+                <div class="aw-step">
+                  <div class="aw-step__num">1</div>
+                  <div class="aw-step__text"><strong>Stay calm and do not panic.</strong> Acting hastily can make the situation worse. Take a moment to collect information before reacting.</div>
+                </div>
+                <div class="aw-step">
+                  <div class="aw-step__num">2</div>
+                  <div class="aw-step__text"><strong>Contact your bank immediately</strong> using the official helpline number listed on the <em>back of your debit/credit card</em> or the bank's official website. Request a freeze on suspicious transactions.</div>
+                </div>
+                <div class="aw-step">
+                  <div class="aw-step__num">3</div>
+                  <div class="aw-step__text"><strong>Call the National Cyber Crime Helpline:</strong> <strong>1930</strong> (available 24×7 in India). This is the fastest route to freeze fraudulent transactions through the banking network.</div>
+                </div>
+                <div class="aw-step">
+                  <div class="aw-step__num">4</div>
+                  <div class="aw-step__text"><strong>File a formal complaint</strong> at the official portal: <a href="https://cybercrime.gov.in" target="_blank" rel="noopener">cybercrime.gov.in</a>. Have your details ready: transaction ID, amount, date, and the suspected fraudster's contact.</div>
+                </div>
+                <div class="aw-step">
+                  <div class="aw-step__num">5</div>
+                  <div class="aw-step__text"><strong>Preserve all evidence</strong> — take screenshots of messages, note down phone numbers, transaction IDs, email addresses, and chat logs before blocking the sender.</div>
+                </div>
+              </div>
+
+              <div class="aw-emergency__note">
+                💡 <strong>Why speed matters:</strong> Quick reporting significantly increases the chances of freezing fraudulent transactions before funds are withdrawn or transferred further. The 1930 helpline is directly linked to the banking system for rapid intervention.
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SECTION 2: Accordion Guide ─────────────────── -->
+          <div class="aw-section">
+            <div class="section__label">Category Breakdown</div>
+            <h2 class="section__title">Scam-Specific Protection Guide</h2>
+            <p class="section__lead" style="margin-bottom: 28px;">
+              Each scam type uses different tactics. Understanding the specific pattern helps you respond correctly and avoid escalating the damage.
+            </p>
+
+            <div class="aw-accordion" id="accordion">
+
+              <!-- 1. UPI Scam -->
+              <div class="aw-acc-item" id="acc-upi">
+                <button class="aw-acc-trigger" onclick="toggleAccordion('acc-upi')">
+                  <div class="aw-acc-cat-icon aw-acc-cat-icon--upi">📲</div>
+                  <div class="aw-acc-label">
+                    <div class="aw-acc-title">UPI Scam</div>
+                    <div class="aw-acc-tagline">Fake payment requests, QR code fraud, impersonated customer care</div>
+                  </div>
+                  <span class="aw-acc-arrow">▼</span>
+                </button>
+                <div class="aw-acc-body">
+                  <div class="aw-acc-inner">
+                    <div class="aw-acc-description">Fraudulent UPI payment requests, deceptive QR codes that debit rather than credit your account, and fake bank customer care representatives asking for OTP or remote access to your device.</div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">⚡ Immediate Actions</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-warn">Do <strong>not</strong> approve any pending UPI payment request.</li>
+                        <li class="aw-warn">Do <strong>not</strong> share OTP or UPI PIN with anyone — ever.</li>
+                        <li>Open your bank app and block UPI transactions immediately.</li>
+                        <li>Contact your bank's official customer care.</li>
+                        <li>Call <strong>1930</strong> immediately if money has already been transferred.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">📋 Follow-Up Steps</div>
+                      <ul class="aw-mini-list">
+                        <li>File a complaint at <a href="https://cybercrime.gov.in" target="_blank" rel="noopener" style="color:var(--electric)">cybercrime.gov.in</a>.</li>
+                        <li>Inform your bank branch in writing with full transaction details.</li>
+                        <li>Change your UPI PIN and banking password.</li>
+                        <li>Enable transaction SMS alerts if not already active.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block aw-acc-sub-block--full">
+                      <div class="aw-acc-col-title">🛡️ Prevention</div>
+                      <ul class="aw-mini-list" style="column-count:2; column-gap:24px;">
+                        <li class="aw-ok">Scanning a QR code to <em>receive</em> money is never required — it is always a scam.</li>
+                        <li class="aw-ok">Always call bank numbers listed on the official bank website, not numbers from SMS or Google.</li>
+                        <li class="aw-ok">Enable UPI transaction limits in your bank app.</li>
+                        <li class="aw-ok">Never grant screen-sharing access during a "customer care" call.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Lottery Scam -->
+              <div class="aw-acc-item" id="acc-lottery">
+                <button class="aw-acc-trigger" onclick="toggleAccordion('acc-lottery')">
+                  <div class="aw-acc-cat-icon aw-acc-cat-icon--lottery">🎰</div>
+                  <div class="aw-acc-label">
+                    <div class="aw-acc-title">Lottery Scam</div>
+                    <div class="aw-acc-tagline">Unsolicited prize notifications, advance fee demands, identity theft</div>
+                  </div>
+                  <span class="aw-acc-arrow">▼</span>
+                </button>
+                <div class="aw-acc-body">
+                  <div class="aw-acc-inner">
+                    <div class="aw-acc-description">Messages or calls informing you that you have won a prize, lottery, or government scheme — but require an upfront "processing fee," "tax payment," or personal documents to release the winnings.</div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">⚡ Immediate Actions</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-warn">Do <strong>not</strong> pay any processing fee, tax, or "release charge."</li>
+                        <li class="aw-warn">Do <strong>not</strong> share copies of Aadhaar, PAN, or passport.</li>
+                        <li>Block the sender on all platforms.</li>
+                        <li>If money was already sent, call <strong>1930</strong> immediately.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">📋 Follow-Up Steps</div>
+                      <ul class="aw-mini-list">
+                        <li>Report the number/account at <a href="https://cybercrime.gov.in" target="_blank" rel="noopener" style="color:var(--electric)">cybercrime.gov.in</a>.</li>
+                        <li>Alert family members, especially elderly relatives who may be re-targeted.</li>
+                        <li>If documents were shared, consider applying for a new ID and informing UIDAI.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block aw-acc-sub-block--full">
+                      <div class="aw-acc-col-title">🛡️ Prevention</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-ok">Legitimate lotteries you have entered never demand upfront payment to release winnings.</li>
+                        <li class="aw-ok">You cannot win a lottery you did not enter. Unsolicited wins are always fraudulent.</li>
+                        <li class="aw-ok">Verify any "government scheme" through the official government portal directly.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Job Fraud -->
+              <div class="aw-acc-item" id="acc-job">
+                <button class="aw-acc-trigger" onclick="toggleAccordion('acc-job')">
+                  <div class="aw-acc-cat-icon aw-acc-cat-icon--job">💼</div>
+                  <div class="aw-acc-label">
+                    <div class="aw-acc-title">Job Fraud</div>
+                    <div class="aw-acc-tagline">Fake job offers, work-from-home scams, registration fee demands</div>
+                  </div>
+                  <span class="aw-acc-arrow">▼</span>
+                </button>
+                <div class="aw-acc-body">
+                  <div class="aw-acc-inner">
+                    <div class="aw-acc-description">Fraudulent job offers — often via WhatsApp or SMS — that promise unrealistic salaries or work-from-home income, then ask for a registration fee, security deposit, or training cost.</div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">⚡ Immediate Actions</div>
+                      <ul class="aw-mini-list">
+                        <li>Stop all communication with the recruiter immediately.</li>
+                        <li class="aw-warn">Do <strong>not</strong> transfer any registration, training, or security fee.</li>
+                        <li>Verify the company via its <em>official website</em> and only contact through the domain email.</li>
+                        <li>If money was already sent — call <strong>1930</strong> and contact your bank immediately.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">📋 Follow-Up Steps</div>
+                      <ul class="aw-mini-list">
+                        <li>Preserve all communication records as evidence.</li>
+                        <li>File a complaint at <a href="https://cybercrime.gov.in" target="_blank" rel="noopener" style="color:var(--electric)">cybercrime.gov.in</a>.</li>
+                        <li>Report the job listing on the platform where you found it (LinkedIn, job boards, WhatsApp).</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block aw-acc-sub-block--full">
+                      <div class="aw-acc-col-title">🛡️ Prevention</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-ok">Genuine employers do not charge any fee at any stage of the hiring process.</li>
+                        <li class="aw-ok">Be sceptical of offers with unrealistic salaries and no interview process.</li>
+                        <li class="aw-ok">Verify job postings directly on the company's official career page.</li>
+                        <li class="aw-ok">Unsolicited job offers via WhatsApp from unknown numbers are almost always fraudulent.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Investment Scam -->
+              <div class="aw-acc-item" id="acc-invest">
+                <button class="aw-acc-trigger" onclick="toggleAccordion('acc-invest')">
+                  <div class="aw-acc-cat-icon aw-acc-cat-icon--invest">📈</div>
+                  <div class="aw-acc-label">
+                    <div class="aw-acc-title">Investment Scam</div>
+                    <div class="aw-acc-tagline">Guaranteed returns, crypto schemes, fake trading platforms</div>
+                  </div>
+                  <span class="aw-acc-arrow">▼</span>
+                </button>
+                <div class="aw-acc-body">
+                  <div class="aw-acc-inner">
+                    <div class="aw-acc-description">Schemes promising guaranteed high returns — often via cryptocurrency, stock tips, or investment apps — that eventually disappear with deposited funds. Often use celebrity or authority endorsements.</div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">⚡ Immediate Actions</div>
+                      <ul class="aw-mini-list">
+                        <li>Stop all further payments or deposits immediately.</li>
+                        <li>Do not transfer more funds to "unlock" previous investments.</li>
+                        <li>Save all receipts, screenshots, and transaction records.</li>
+                        <li>Contact your bank to dispute or freeze associated transactions.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">📋 Follow-Up Steps</div>
+                      <ul class="aw-mini-list">
+                        <li>File a complaint at <a href="https://cybercrime.gov.in" target="_blank" rel="noopener" style="color:var(--electric)">cybercrime.gov.in</a>.</li>
+                        <li>For securities or market-related fraud, report to <a href="https://sebi.gov.in" target="_blank" rel="noopener" style="color:var(--electric)">SEBI (sebi.gov.in)</a>.</li>
+                        <li>File a formal police complaint (FIR) at your nearest cybercrime police station.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block aw-acc-sub-block--full">
+                      <div class="aw-acc-col-title">🛡️ Prevention</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-ok">No legitimate investment guarantees fixed high returns. If it sounds too good to be true, it is.</li>
+                        <li class="aw-ok">Verify that any financial advisor or firm is registered with SEBI before investing.</li>
+                        <li class="aw-ok">Be very cautious of celebrity-endorsed crypto or trading schemes on social media.</li>
+                        <li class="aw-ok">Check RBI's approved list of financial entities before engaging any new platform.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. KYC Scam -->
+              <div class="aw-acc-item" id="acc-kyc">
+                <button class="aw-acc-trigger" onclick="toggleAccordion('acc-kyc')">
+                  <div class="aw-acc-cat-icon aw-acc-cat-icon--kyc">🪪</div>
+                  <div class="aw-acc-label">
+                    <div class="aw-acc-title">KYC Scam</div>
+                    <div class="aw-acc-tagline">Phishing links, fake bank portals, account block threats</div>
+                  </div>
+                  <span class="aw-acc-arrow">▼</span>
+                </button>
+                <div class="aw-acc-body">
+                  <div class="aw-acc-inner">
+                    <div class="aw-acc-description">Fraudsters impersonate banks, RBI, or telecom operators via SMS, WhatsApp, or calls — claiming your KYC is expired and your account will be blocked unless you click a link or share details urgently.</div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">⚡ Immediate Actions</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-warn">Do <strong>not</strong> click links in unsolicited SMS or WhatsApp messages.</li>
+                        <li>Navigate to your bank's website <em>manually</em> by typing the URL directly.</li>
+                        <li>Contact your bank using the number on your card or official website.</li>
+                        <li class="aw-warn">Do <strong>not</strong> share OTP, CVV, or PIN with anyone — banks never ask for this.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block">
+                      <div class="aw-acc-col-title">📋 If Details Were Shared</div>
+                      <ul class="aw-mini-list">
+                        <li>Change all banking passwords and PINs immediately.</li>
+                        <li>Block your debit and credit cards and request replacements.</li>
+                        <li>Enable all available SMS and email transaction alerts.</li>
+                        <li>File a complaint at <a href="https://cybercrime.gov.in" target="_blank" rel="noopener" style="color:var(--electric)">cybercrime.gov.in</a>.</li>
+                      </ul>
+                    </div>
+                    <div class="aw-acc-sub-block aw-acc-sub-block--full">
+                      <div class="aw-acc-col-title">🛡️ Prevention</div>
+                      <ul class="aw-mini-list">
+                        <li class="aw-ok">Banks and RBI never request OTP, PIN, or password over call, SMS, or WhatsApp.</li>
+                        <li class="aw-ok">Legitimate KYC updates happen at the branch or through the official app — never via a link.</li>
+                        <li class="aw-ok">Verify a website's URL carefully — scammers use near-identical domain names (e.g. sbi-kyc.com vs sbi.co.in).</li>
+                        <li class="aw-ok">Use an ad-blocker and keep your browser updated to reduce exposure to phishing pages.</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /accordion -->
+          </div>
+
+          <!-- ── SECTION 3: Official Resources ───────────────── -->
+          <div class="aw-section">
+            <div class="section__label">Official Channels</div>
+            <h2 class="section__title">Official Reporting &amp; Regulatory Resources</h2>
+            <p class="section__lead" style="margin-bottom: 28px;">
+              Use only these verified official channels to report fraud and seek assistance. Avoid third-party "recovery" services — many are themselves fraudulent.
+            </p>
+
+            <div class="aw-resource-grid">
+              <div class="aw-resource-card">
+                <div class="aw-resource-icon">🌐</div>
+                <div class="aw-resource-body">
+                  <div class="aw-resource-title">National Cyber Crime Portal</div>
+                  <div class="aw-resource-desc">India's primary portal for reporting all digital fraud and cybercrime. Operated by the Ministry of Home Affairs.</div>
+                  <div class="aw-resource-links">
+                    <a class="aw-resource-link" href="https://cybercrime.gov.in" target="_blank" rel="noopener">
+                      cybercrime.gov.in <span class="aw-resource-link__arrow">→</span>
+                    </a>
+                    <span class="aw-helpline">📞 Helpline: <strong>1930</strong> (24×7)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aw-resource-card">
+                <div class="aw-resource-icon">🏦</div>
+                <div class="aw-resource-body">
+                  <div class="aw-resource-title">Reserve Bank of India (RBI)</div>
+                  <div class="aw-resource-desc">For banking fraud, loan-related scams, and unauthorised payment operator complaints. Check RBI's approved entity list before engaging any financial service.</div>
+                  <div class="aw-resource-links">
+                    <a class="aw-resource-link" href="https://rbi.org.in" target="_blank" rel="noopener">
+                      rbi.org.in <span class="aw-resource-link__arrow">→</span>
+                    </a>
+                    <a class="aw-resource-link" href="https://sachet.rbi.org.in" target="_blank" rel="noopener">
+                      sachet.rbi.org.in (Alert Portal) <span class="aw-resource-link__arrow">→</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aw-resource-card">
+                <div class="aw-resource-icon">📊</div>
+                <div class="aw-resource-body">
+                  <div class="aw-resource-title">SEBI — Securities &amp; Investment Fraud</div>
+                  <div class="aw-resource-desc">For investment scams, fake trading platforms, unregistered advisors, and stock market fraud. Verify advisor registrations here before investing.</div>
+                  <div class="aw-resource-links">
+                    <a class="aw-resource-link" href="https://sebi.gov.in" target="_blank" rel="noopener">
+                      sebi.gov.in <span class="aw-resource-link__arrow">→</span>
+                    </a>
+                    <a class="aw-resource-link" href="https://scores.sebi.gov.in" target="_blank" rel="noopener">
+                      SCORES Complaint Portal <span class="aw-resource-link__arrow">→</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="aw-resource-card">
+                <div class="aw-resource-icon">🏛️</div>
+                <div class="aw-resource-body">
+                  <div class="aw-resource-title">Your Bank — Official Contact</div>
+                  <div class="aw-resource-desc">Always use the helpline number printed on the back of your bank card or listed on the official bank website. Never use numbers from SMS, WhatsApp, or Google Search results.</div>
+                  <div class="aw-resource-links">
+                    <span class="aw-helpline" style="font-size:13.5px;">Use number on your card or official bank website only.</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div><!-- /aw-col -->
+      </div><!-- /container -->
+    </div><!-- /aw-body -->
+
+  </main>
+
+  <!-- ═══════════════════════════ FOOTER ══════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <span class="logo__mark logo__mark--sm"></span>
+          <span class="footer__name">RakshaSutra</span>
+        </div>
+        <div class="footer__meta">
+          <span class="footer__sep">·</span>
+          <span>Team RakshaSutra</span>
+          <span class="footer__sep">·</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Navbar scroll ─────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    // ── Accordion ─────────────────────────────────────────────────
+    function toggleAccordion(id) {
+      const items = document.querySelectorAll('.aw-acc-item');
+      items.forEach(item => {
+        if (item.id === id) {
+          item.classList.toggle('open');
+        } else {
+          item.classList.remove('open'); // only one open at a time
+        }
+      });
+    }
+
+    // Open first item by default
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('acc-upi').classList.add('open');
+    });
+  </script>
+
+</body>
+</html>
