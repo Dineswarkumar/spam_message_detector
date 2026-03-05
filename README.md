@@ -53,6 +53,4 @@ The server will start locally. By default, you can access the frontend by openin
 ## 🌐 Live Demo
 *(Assuming it is deployed on Render)*
 The API model and frontend are currently serving live at:
-https://spam-message-detector-04qe.onrender.com
-
-*(Note: Free-tier Render instances spin down after 15 minutes of inactivity. When visiting the URL after a period of inactivity, the page may take up to 50 seconds to load as the server wakes up).*
+https://spam-message-detector-mk6g.onrender.com/static/index.html
