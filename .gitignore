@@ -1,0 +1,11 @@
+# Ignore large model files
+*.pkl
+
+# Ignore python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Ignore static directory contents, but keep the directory
+static/*
+!static/.gitkeep

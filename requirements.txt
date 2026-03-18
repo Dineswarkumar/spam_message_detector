@@ -1,0 +1,19 @@
+# RakshaSutra Phase 2 — Requirements
+# Install with: pip install -r requirements.txt
+
+fastapi
+uvicorn[standard]
+pydantic
+joblib
+scikit-learn
+pandas
+numpy
+
+# ML — Transformer (recommended, ~120MB download on first run)
+sentence-transformers
+
+# ML — Boosted classifier (recommended)
+xgboost
+
+# Language detection (optional, for more accurate language ID)
+# langdetect
