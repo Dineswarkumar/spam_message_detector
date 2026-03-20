@@ -6,6 +6,4 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
-# Ignore static directory contents, but keep the directory
-static/*
-!static/.gitkeep
+

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RakshaSutra — AI Fraud Detection Shield</title>
+  <meta name="description" content="RakshaSutra: Multilingual AI-powered fraud and spam message detector with real-time explainability." />
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>" />
+</head>
+<body>
+
+<!-- Ambient orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+  <!-- ══════════════ HEADER ══════════════ -->
+  <header>
+    <div class="logo-ring">🛡️</div>
+    <h1 class="brand-title">RakshaSutra</h1>
+    <p class="brand-sub">Multilingual AI Fraud Detection Engine · Phase 2</p>
+  </header>
+
+  <!-- ══════════════ STATUS BAR ══════════════ -->
+  <div class="status-bar">
+    <div class="status-pill">
+      <span class="status-dot" id="status-dot-api"></span>
+      <span id="status-label-api">Connecting…</span>
+    </div>
+    <div class="status-pill">
+      🔬 Analyzed: <span class="stat-num" id="stat-total">0</span>
+    </div>
+    <div class="status-pill">
+      🚨 Fraud: <span class="stat-num" style="color:var(--fraud)" id="stat-fraud">0</span>
+    </div>
+    <div class="status-pill">
+      ✅ Safe: <span class="stat-num" style="color:var(--safe)" id="stat-safe">0</span>
+    </div>
+  </div>
+
+  <!-- ══════════════ TABS ══════════════ -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-tab="single" role="tab"
+            onclick="switchTab('single')">🔍 Single Message</button>
+    <button class="tab-btn" data-tab="batch" role="tab"
+            onclick="switchTab('batch')">📋 Batch Analyze</button>
+  </div>
+
+  <!-- ══════════════ SINGLE TAB ══════════════ -->
+  <div id="single-panel">
+
+    <!-- Input card -->
+    <div class="card input-card">
+      <div class="card-title">📨 Paste the suspicious message</div>
+      <textarea
+        id="msg-input"
+        class="msg-textarea"
+        rows="5"
+        maxlength="1000"
+        placeholder="Paste a suspicious SMS, WhatsApp, or email message here…"
+        oninput="updateCharCount()"
+      ></textarea>
+      <div class="input-footer">
+        <span class="char-count" id="char-count">0 / 1000 chars</span>
+        <button class="btn-analyze" id="analyze-btn" onclick="analyzeMessage()">
+          <span class="btn-icon">🛡️</span>
+          <span class="btn-spin">⏳</span>
+          Analyze Message
+          <small style="opacity:.7;font-size:.75rem">Ctrl+Enter</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── RESULTS PANEL ─── -->
+    <div id="results-panel">
+
+      <!-- Risk gauge + Status -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="gauge-section">
+          <!-- Gauge -->
+          <div class="gauge-wrap">
+            <svg class="gauge-svg" width="180" height="180" viewBox="0 0 120 120">
+              <!-- Background track (270° arc) -->
+              <circle class="gauge-track"
+                      cx="60" cy="60" r="45"
+                      stroke-dasharray="212 283"
+                      stroke-dashoffset="-35"
+                      transform="rotate(135 60 60)" />
+              <!-- Fill arc -->
+              <circle class="gauge-fill"
+                      cx="60" cy="60" r="45"
+                      stroke-dasharray="283"
+                      stroke-dashoffset="283"
+                      transform="rotate(135 60 60)" />
+              <!-- Score text -->
+              <text class="gauge-score-text" x="60" y="58" id="gauge-score">0</text>
+              <text class="gauge-label-text" x="60" y="74">Risk Score</text>
+            </svg>
+            <div class="gauge-sub">Out of 100 · Threshold: 65 = Fraud</div>
+          </div>
+
+          <!-- Status + quick details -->
+          <div>
+            <div id="status-badge" class="status-badge-lg safe">
+              <span class="badge-pulse"></span>
+              ✅ Safe
+            </div>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Risk Score</div>
+                <div class="detail-value" id="d-risk">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Language</div>
+                <div class="detail-value" id="d-lang">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">ML Confidence</div>
+                <div class="detail-value" id="d-ml">—</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Rule Score</div>
+                <div class="detail-value" id="d-rule">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Language banner -->
+      <div class="lang-badge" id="lang-banner" style="margin-bottom:20px">
+        🌐 Detected language: <strong>—</strong>
+      </div>
+
+      <!-- Progress bars: ML + Rule -->
+      <div class="card bar-section" style="margin-bottom:20px">
+        <div class="card-title">📊 Score Components</div>
+
+        <div class="bar-item">
+          <div class="bar-header">
+            <span class="bar-name">🤖 ML Model Confidence</span>
+            <span class="bar-pct" id="bar-ml-pct">0%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ml" id="bar-ml-fill"></div>
+          </div>
+        </div>
+
+        <div class="bar-item">
+          <div class="bar-header">
+            <span class="bar-name">📐 Rule Engine Score</span>
+            <span class="bar-pct" id="bar-rule-pct">0 / 60</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill rule" id="bar-rule-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut breakdown -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">🧩 Score Breakdown</div>
+        <div class="breakdown-section">
+          <!-- Donut SVG (r=40 → C=251) -->
+          <svg class="donut-svg" width="140" height="140" viewBox="0 0 100 100">
+            <circle class="donut-bg"   cx="50" cy="50" r="40"
+                    stroke-dasharray="251 251" stroke-dashoffset="0"
+                    transform="rotate(-90 50 50)" />
+            <circle class="donut-ml"   cx="50" cy="50" r="40"
+                    stroke-dasharray="0 251"
+                    transform="rotate(-90 50 50)" />
+            <circle class="donut-rule" cx="50" cy="50" r="40"
+                    stroke-dasharray="0 251"
+                    transform="rotate(-90 50 50)" />
+            <text class="donut-center-label" x="50" y="47" id="donut-center">0</text>
+            <text class="donut-center-sub"   x="50" y="59">Total</text>
+          </svg>
+
+          <div class="breakdown-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#3b82f6"></div>
+              <div class="legend-info">
+                <div class="legend-name">ML Component (max 55)</div>
+                <div class="legend-val" id="legend-ml-val">—</div>
+              </div>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background:#f59e0b"></div>
+              <div class="legend-info">
+                <div class="legend-name">Rule Component (max 60)</div>
+                <div class="legend-val" id="legend-rule-val">—</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:.78rem;color:var(--text-muted);line-height:1.5">
+              Combined cap: 100 · Fraud ≥ 65 · Suspicious ≥ 35
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flags -->
+      <div class="card flags-section" style="margin-bottom:20px">
+        <div class="card-title">🚩 Threat Flags Detected</div>
+        <div class="flags-grid" id="flags-container">
+          <span class="no-flags">Run analysis to see flags</span>
+        </div>
+      </div>
+
+      <!-- Reasons -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">💡 Explainability — Why this score?</div>
+        <ul class="reasons-list" id="reasons-list">
+          <li class="reason-item"><span class="reason-dot"></span>Run analysis to see reasons</li>
+        </ul>
+      </div>
+
+      <!-- Verdict -->
+      <div id="verdict-card" class="verdict-card safe">
+        <span class="verdict-icon">🛡️</span>Run analysis to see the AI verdict.
+      </div>
+
+    </div><!-- /results-panel -->
+  </div><!-- /single-panel -->
+
+  <!-- ══════════════ BATCH TAB ══════════════ -->
+  <div id="batch-panel" style="display:none">
+    <div class="card">
+      <div class="card-title">📋 Batch Message Analyzer</div>
+      <p class="batch-info">Enter one message per line (max 50 messages). All will be analyzed simultaneously.</p>
+      <textarea
+        class="batch-textarea"
+        id="batch-input"
+        rows="8"
+        placeholder="You have won a lottery! Click http://bit.ly/claim now
+Urgent: Your bank account will be blocked. Call 9876543210
+Hi, are you free for dinner tonight?"
+      ></textarea>
+      <button class="btn-batch" id="batch-btn" onclick="batchAnalyze()">
+        🔍 Analyze Batch
+      </button>
+    </div>
+
+    <!-- Batch results -->
+    <div id="batch-results" style="display:none;margin-top:24px">
+      <div class="batch-summary">
+        <div class="batch-stat">
+          <div class="batch-stat-num" id="b-total">0</div>
+          <div class="batch-stat-lbl">Total</div>
+        </div>
+        <div class="batch-stat" style="border-color:rgba(239,68,68,.3)">
+          <div class="batch-stat-num" style="color:var(--fraud)" id="b-fraud">0</div>
+          <div class="batch-stat-lbl">🚨 Fraud</div>
+        </div>
+        <div class="batch-stat" style="border-color:rgba(245,158,11,.3)">
+          <div class="batch-stat-num" style="color:var(--warn)" id="b-susp">0</div>
+          <div class="batch-stat-lbl">⚠️ Suspicious</div>
+        </div>
+        <div class="batch-stat" style="border-color:rgba(34,197,94,.3)">
+          <div class="batch-stat-num" style="color:var(--safe)" id="b-safe">0</div>
+          <div class="batch-stat-lbl">✅ Safe</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Risk</th>
+              <th>ML Conf.</th>
+              <th>Language</th>
+              <th>Top Flags</th>
+            </tr>
+          </thead>
+          <tbody id="batch-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div><!-- /batch-panel -->
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer style="text-align:center;margin-top:60px;font-size:.78rem;color:var(--text-muted)">
+    <div style="margin-bottom:8px">
+      🛡️ <strong style="color:var(--text-b)">RakshaSutra</strong> · 
+      Multilingual Fraud Detection · Phase 2 · 
+      Hybrid ML + Rule Engine
+    </div>
+    <div>API: <code style="background:rgba(255,255,255,.07);padding:2px 8px;border-radius:4px;font-size:.75rem">/api/predict</code> · 
+         <code style="background:rgba(255,255,255,.07);padding:2px 8px;border-radius:4px;font-size:.75rem">/api/batch_predict</code> · 
+         <a href="/docs" style="color:var(--accent-blue);text-decoration:none">Swagger Docs ↗</a>
+    </div>
+  </footer>
+
+</div><!-- /wrapper -->
+
+<!-- Error toast -->
+<div class="toast" role="alert" aria-live="assertive"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
