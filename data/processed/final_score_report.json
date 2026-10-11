@@ -1,0 +1,56 @@
+{
+  "annotator_provenance": "single annotator, no inter-annotator agreement",
+  "kappa": null,
+  "note": "The test set was sampled from the review queue (rows the corpus labeller abstained on), stratified by source and script. It is deliberately harder than the validation split and is NOT a like-for-like comparison with the validation macro-F1.",
+  "by_language": {
+    "english": {
+      "script": "latin",
+      "n": 196,
+      "accuracy": 0.75
+    },
+    "hinglish": {
+      "script": "latin",
+      "n": 75,
+      "accuracy": 0.72
+    },
+    "tenglish": {
+      "script": "mixed_telugu_latin",
+      "n": 21,
+      "accuracy": 1.0
+    },
+    "hindi": {
+      "script": "devanagari",
+      "n": 13,
+      "accuracy": 0.3846
+    }
+  },
+  "accuracy": 0.7443,
+  "macro_f1": 0.7444,
+  "n_scored": 305,
+  "n_excluded_review": 5,
+  "per_class": {
+    "legitimate": {
+      "precision": 0.595,
+      "recall": 0.8571,
+      "f1": 0.7024,
+      "support": 84
+    },
+    "marketing_spam": {
+      "precision": 0.747,
+      "recall": 0.7848,
+      "f1": 0.7654,
+      "support": 79
+    },
+    "scam": {
+      "precision": 0.9208,
+      "recall": 0.6549,
+      "f1": 0.7654,
+      "support": 142
+    }
+  },
+  "excluding_flagged_rows": {
+    "accuracy": 0.7492,
+    "macro_f1": 0.7494,
+    "n": 303
+  }
+}
