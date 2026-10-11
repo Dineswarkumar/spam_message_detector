@@ -10,7 +10,7 @@ SMS and message scam checker for English, Hinglish, and Indian-language messages
 
 | **Live Analysis (Marketing Spam)** | **Detection Engine & Metrics** |
 |:---:|:---:|
-|<img width="100%" src="https://github.com/user-attachments/assets/5af4bb69-d165-4714-8ae5-3d5d8843d0ed" /> | <img src="docs/screenshots/detection-engine.png" alt="Detection Engine Details" width="100%"/> |
+| <img src="docs/screenshots/marketing-spam.png" alt="Marketing Spam Analysis" width="100%"/> | <img src="docs/screenshots/detection-engine.png" alt="Detection Engine Details" width="100%"/> |
 
 | **Safety Rules & Guidance** | **Report Fraud Channels** |
 |:---:|:---:|
