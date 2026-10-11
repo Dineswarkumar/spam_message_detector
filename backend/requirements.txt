@@ -1,0 +1,12 @@
+# Spam Shield API -- pinned for reproducible Render builds.
+# Pinned because the trained artifact was fitted with these exact versions;
+# a major scikit-learn bump changes the TF-IDF and SVM internals and can break
+# loading of model.joblib.
+
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+scikit-learn==1.9.0
+numpy==2.5.1
+scipy==1.18.0
+joblib==1.4.2

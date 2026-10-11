@@ -1,0 +1,3790 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spam Shield — Intelligent Message Protection</title>
+  <link rel="icon" type="image/png" href="/assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Instant theme initialization to eliminate Flash of Unstyled Theme (FOUC) -->
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem('spam-shield-theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          document.documentElement.dataset.theme = savedTheme;
+        } else {
+          var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.theme = prefersDark ? 'dark' : 'light';
+        }
+      } catch (err) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    })();
+  </script>
+
+  <style>
+    /* ══════════════════════════════════════════════════════════════
+       DESIGN TOKENS & SYSTEM VARIABLES (Blue & White Modern Palette)
+       ══════════════════════════════════════════════════════════════ */
+    :root {
+      --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+      /* Motion Easings (Inspired by Animos & Transitions.dev spring physics) */
+      --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-smooth: cubic-bezier(0.25, 0.8, 0.25, 1);
+      --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+      --duration-fast: 160ms;
+      --duration-normal: 280ms;
+      --duration-slow: 450ms;
+
+      /* Radius tokens */
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 26px;
+      --radius-full: 9999px;
+    }
+
+    /* ── Dark Theme (Midnight Sapphire & Frosted Glass) ── */
+    [data-theme='dark'] {
+      --bg-canvas: #070d18;
+      --bg-surface: rgba(13, 23, 42, 0.74);
+      --bg-surface-elevated: rgba(19, 34, 60, 0.82);
+      --bg-surface-glass: rgba(13, 23, 42, 0.65);
+      --bg-input: rgba(10, 18, 33, 0.85);
+      --bg-chip: rgba(30, 58, 102, 0.35);
+      --bg-chip-hover: rgba(37, 99, 235, 0.25);
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(56, 189, 248, 0.28);
+      --border-focus: #38bdf8;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-subtle: #64748b;
+
+      --accent-primary: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-cyan: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.28);
+
+      --danger-main: #ef4444;
+      --danger-surface: rgba(239, 68, 68, 0.12);
+      --danger-border: rgba(239, 68, 68, 0.32);
+      --danger-glow: rgba(239, 68, 68, 0.25);
+
+      --safe-main: #10b981;
+      --safe-surface: rgba(16, 185, 129, 0.12);
+      --safe-border: rgba(16, 185, 129, 0.32);
+      --safe-glow: rgba(16, 185, 129, 0.25);
+
+      --warn-main: #f59e0b;
+      --warn-surface: rgba(245, 158, 11, 0.12);
+      --warn-border: rgba(245, 158, 11, 0.32);
+
+      --shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.55);
+      --shadow-card: 0 16px 40px -12px rgba(2, 6, 23, 0.7);
+      --shadow-hover: 0 24px 50px -12px rgba(2, 132, 199, 0.25);
+
+      /* Subtle Blue Glow Orbs (Calm, luminous, non-distracting) */
+      --orb-1: rgba(37, 99, 235, 0.22);
+      --orb-2: rgba(56, 189, 248, 0.18);
+      --orb-3: rgba(30, 64, 175, 0.16);
+      --orb-4: rgba(14, 165, 233, 0.12);
+      --grain-opacity: 0.035;
+    }
+
+    /* ── Light Theme (Crisp Cloud White & Vibrant Azure) ── */
+    [data-theme='light'] {
+      --bg-canvas: #f4f8fc;
+      --bg-surface: rgba(255, 255, 255, 0.88);
+      --bg-surface-elevated: rgba(255, 255, 255, 0.95);
+      --bg-surface-glass: rgba(255, 255, 255, 0.85);
+      --bg-input: #ffffff;
+      --bg-chip: rgba(224, 242, 254, 0.65);
+      --bg-chip-hover: rgba(186, 230, 253, 0.85);
+
+      --border-subtle: rgba(15, 23, 42, 0.08);
+      --border-strong: rgba(2, 132, 199, 0.25);
+      --border-focus: #0284c7;
+
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-subtle: #64748b;
+
+      --accent-primary: #0284c7;
+      --accent-hover: #0369a1;
+      --accent-cyan: #0ea5e9;
+      --accent-glow: rgba(2, 132, 199, 0.18);
+
+      --danger-main: #dc2626;
+      --danger-surface: rgba(220, 38, 38, 0.08);
+      --danger-border: rgba(220, 38, 38, 0.25);
+      --danger-glow: rgba(220, 38, 38, 0.15);
+
+      --safe-main: #059669;
+      --safe-surface: rgba(5, 150, 105, 0.08);
+      --safe-border: rgba(5, 150, 105, 0.25);
+      --safe-glow: rgba(5, 150, 105, 0.15);
+
+      --warn-main: #d97706;
+      --warn-surface: rgba(217, 119, 6, 0.08);
+      --warn-border: rgba(217, 119, 6, 0.25);
+
+      --shadow-soft: 0 8px 24px -8px rgba(15, 23, 42, 0.08);
+      --shadow-card: 0 16px 36px -10px rgba(2, 132, 199, 0.1);
+      --shadow-hover: 0 24px 48px -12px rgba(2, 132, 199, 0.22);
+
+      /* Subtle Blue Glow Orbs (Ethereal light-mode sky glow) */
+      --orb-1: rgba(147, 197, 253, 0.45);
+      --orb-2: rgba(186, 230, 253, 0.52);
+      --orb-3: rgba(191, 219, 254, 0.40);
+      --orb-4: rgba(224, 242, 254, 0.60);
+      --grain-opacity: 0.02;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       BASE RESET & TYPOGRAPHY
+       ══════════════════════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color var(--duration-normal) ease, color var(--duration-normal) ease;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SUBTLE ANIMATED BLUE GLOW ORBS
+       ══════════════════════════════════════════════════════════════ */
+    .ambient-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      filter: blur(90px) saturate(140%);
+    }
+
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.68;
+      will-change: transform, opacity;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Top-left sapphire glow */
+    .orb-1 {
+      width: 52vw;
+      height: 52vw;
+      max-width: 720px;
+      max-height: 720px;
+      background: radial-gradient(circle, var(--orb-1) 0%, rgba(14, 165, 233, 0.08) 50%, transparent 72%);
+      top: -12vw;
+      left: -8vw;
+      animation: calmDrift1 26s ease-in-out infinite alternate;
+    }
+
+    /* Bottom-right cyan glow */
+    .orb-2 {
+      width: 48vw;
+      height: 48vw;
+      max-width: 680px;
+      max-height: 680px;
+      background: radial-gradient(circle, var(--orb-2) 0%, rgba(37, 99, 235, 0.06) 52%, transparent 72%);
+      bottom: -10vw;
+      right: -6vw;
+      animation: calmDrift2 32s ease-in-out infinite alternate;
+    }
+
+    /* Subtle mid-page ambient azure glow */
+    .orb-3 {
+      width: 40vw;
+      height: 40vw;
+      max-width: 560px;
+      max-height: 560px;
+      background: radial-gradient(circle, var(--orb-3) 0%, transparent 68%);
+      top: 36%;
+      left: 32%;
+      animation: calmDrift3 36s ease-in-out infinite alternate;
+    }
+
+    /* Delicate top-right accent glow */
+    .orb-4 {
+      width: 32vw;
+      height: 32vw;
+      max-width: 440px;
+      max-height: 440px;
+      background: radial-gradient(circle, var(--orb-4) 0%, transparent 65%);
+      top: 5%;
+      right: 15%;
+      animation: calmDrift4 28s ease-in-out infinite alternate;
+    }
+
+    @keyframes calmDrift1 {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(4vw, 3vh, 0) scale(1.05); }
+      100% { transform: translate3d(8vw, 6vh, 0) scale(1.08); }
+    }
+
+    @keyframes calmDrift2 {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(-5vw, -4vh, 0) scale(1.06); }
+      100% { transform: translate3d(-7vw, -6vh, 0) scale(1.1); }
+    }
+
+    @keyframes calmDrift3 {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(-4vw, 4vh, 0) scale(0.96); }
+      100% { transform: translate3d(-6vw, 5vh, 0) scale(0.92); }
+    }
+
+    @keyframes calmDrift4 {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      100% { transform: translate3d(5vw, -3vh, 0) scale(1.04); }
+    }
+
+    /* Fine tactile texture overlay */
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: var(--grain-opacity);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       LAYOUT WRAPPER & GENTLE HOVER LIFT ON CARDS
+       ══════════════════════════════════════════════════════════════ */
+    .app-shell {
+      position: relative;
+      z-index: 2;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* Floating Glass Card Primitive with Gentle Hover Lift */
+    .glass-card {
+      background: var(--bg-surface);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.28s var(--ease-spring),
+                  box-shadow 0.28s var(--ease-spring),
+                  border-color 0.22s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-3.5px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--border-strong);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       HEADER
+       ══════════════════════════════════════════════════════════════ */
+    header.app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-logo-frame {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 14px var(--accent-glow);
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: transform var(--duration-fast) var(--ease-spring);
+    }
+
+    .brand-wrap:hover .brand-logo-frame {
+      transform: scale(1.05);
+    }
+
+    .brand-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-text-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-tag {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-chip);
+      color: var(--accent-cyan);
+      border: 1px solid var(--border-strong);
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Live / Demo Mode Badge */
+    .connection-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: help;
+      transition: border-color var(--duration-fast) ease, transform 0.2s var(--ease-spring);
+    }
+
+    .connection-badge:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .connection-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--warn-main);
+      box-shadow: 0 0 8px var(--warn-main);
+      transition: background-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+    }
+
+    .connection-badge.is-live .connection-dot {
+      background: var(--safe-main);
+      box-shadow: 0 0 8px var(--safe-main);
+    }
+
+    /* Theme Toggle */
+    .theme-toggle-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: transform var(--duration-fast) var(--ease-spring),
+                  color var(--duration-fast) ease,
+                  border-color var(--duration-fast) ease;
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-strong);
+      transform: translateY(-1.5px) scale(1.03);
+    }
+
+    .theme-toggle-btn:active {
+      transform: scale(0.95);
+    }
+
+    .theme-toggle-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform var(--duration-normal) var(--ease-spring);
+    }
+
+    .theme-toggle-btn .icon-sun { display: none; }
+    [data-theme='light'] .theme-toggle-btn .icon-moon { display: none; }
+    [data-theme='light'] .theme-toggle-btn .icon-sun { display: block; }
+
+    /* ══════════════════════════════════════════════════════════════
+       HERO SECTION
+       ══════════════════════════════════════════════════════════════ */
+    .hero-section {
+      text-align: center;
+      max-width: 760px;
+      margin: 4px auto 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 15px;
+      border-radius: var(--radius-full);
+      background: var(--bg-chip);
+      color: var(--accent-cyan);
+      border: 1px solid var(--border-strong);
+      box-shadow: 0 4px 16px var(--accent-glow);
+    }
+
+    .hero-title {
+      font-size: clamp(2.2rem, 5.2vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      color: var(--text-main);
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-primary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: clamp(0.98rem, 1.8vw, 1.15rem);
+      line-height: 1.6;
+      color: var(--text-muted);
+      max-width: 620px;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ANALYZER WORKSPACE (INPUT & CONTROLS)
+       ══════════════════════════════════════════════════════════════ */
+    .analyzer-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .analyzer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .card-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-actions-quick {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-ghost-sm {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--duration-fast) ease;
+    }
+
+    .btn-ghost-sm:hover {
+      color: var(--text-main);
+      background: var(--bg-chip);
+      border-color: var(--border-subtle);
+      transform: translateY(-1px);
+    }
+
+    /* Textarea container */
+    .textarea-container {
+      position: relative;
+      border-radius: var(--radius-md);
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+    }
+
+    .textarea-container:focus-within {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .message-textarea {
+      width: 100%;
+      min-height: 140px;
+      max-height: 380px;
+      padding: 16px 18px;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.98rem;
+      line-height: 1.6;
+      resize: vertical;
+    }
+
+    .message-textarea::placeholder {
+      color: var(--text-subtle);
+      opacity: 0.8;
+    }
+
+    /* Textarea bottom bar */
+    .analyzer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-top: 4px;
+    }
+
+    .meta-indicators {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    .meta-pill {
+      background: var(--bg-chip);
+      padding: 3px 9px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      transition: color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+    }
+
+    .meta-pill.active {
+      color: var(--accent-cyan);
+      border-color: var(--border-strong);
+    }
+
+    /* Primary CTA Button */
+    .btn-analyze {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--accent-primary), #1d4ed8);
+      color: #ffffff;
+      font-size: 0.94rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
+      transition: transform var(--duration-fast) var(--ease-spring),
+                  box-shadow var(--duration-fast) ease,
+                  filter var(--duration-fast) ease;
+    }
+
+    .btn-analyze:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
+      filter: brightness(1.06);
+    }
+
+    .btn-analyze:active:not(:disabled) {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn-analyze:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-analyze svg {
+      width: 18px;
+      height: 18px;
+      transition: transform var(--duration-normal) var(--ease-spring);
+    }
+
+    .btn-analyze:hover svg {
+      transform: scale(1.12);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SAMPLE MESSAGES CHIPS
+       ══════════════════════════════════════════════════════════════ */
+    .samples-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: -6px;
+    }
+
+    .samples-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .samples-title-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .samples-hint-mobile {
+      display: none; /* Only shown on mobile */
+    }
+
+    .samples-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .sample-chip {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      user-select: none;
+      transition: transform 0.22s var(--ease-spring),
+                  box-shadow 0.22s var(--ease-spring),
+                  background-color 0.18s ease,
+                  border-color 0.18s ease,
+                  color 0.18s ease;
+    }
+
+    .sample-chip:hover {
+      color: var(--text-main);
+      border-color: var(--border-strong);
+      background: var(--bg-chip-hover);
+      transform: translateY(-2.5px);
+      box-shadow: 0 6px 18px -4px var(--accent-glow);
+    }
+
+    .sample-chip:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .sample-tag {
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    .sample-tag.scam {
+      background: var(--danger-surface);
+      color: var(--danger-main);
+    }
+
+    .sample-tag.safe {
+      background: var(--safe-surface);
+      color: var(--safe-main);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SCANNING / LOADING STATE ANIMATION
+       ══════════════════════════════════════════════════════════════ */
+    .scanner-card {
+      padding: 36px 24px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+    }
+
+    .scanner-card.active {
+      display: flex;
+      animation: fadeIn var(--duration-normal) var(--ease-spring) forwards;
+    }
+
+    /* Scanning laser sweep line */
+    .scan-laser {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, #38bdf8 25%, #60a5fa 50%, #38bdf8 75%, transparent 100%);
+      box-shadow: 0 0 18px 2px rgba(56, 189, 248, 0.75);
+      animation: laserSweep 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes laserSweep {
+      0% { top: -2%; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 102%; opacity: 0; }
+    }
+
+    .radar-icon-wrap {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: var(--bg-chip);
+      border: 1px solid var(--border-strong);
+      display: grid;
+      place-items: center;
+      color: var(--accent-cyan);
+      position: relative;
+    }
+
+    .radar-icon-wrap::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-cyan);
+      opacity: 0.45;
+      animation: pulseRadar 1.4s ease-out infinite;
+    }
+
+    @keyframes pulseRadar {
+      0% { transform: scale(0.9); opacity: 0.85; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .scanning-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .scanning-status-text {
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      color: var(--accent-cyan);
+      min-height: 22px;
+      transition: opacity 0.15s ease;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SMOOTH TRANSITIONS WHEN ANALYSIS RESULTS APPEAR
+       ══════════════════════════════════════════════════════════════ */
+    .results-card {
+      padding: 28px;
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-subtle);
+    }
+
+    @keyframes resultCardEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.99);
+        filter: blur(4px);
+      }
+      60% {
+        filter: blur(0);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+      }
+    }
+
+    .results-card.active {
+      display: flex;
+      animation: resultCardEnter 0.45s var(--ease-spring) both;
+    }
+
+    /* Verdict Header Banner */
+    .verdict-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .verdict-main-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .verdict-icon-badge {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-lg);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      transition: all var(--duration-normal) var(--ease-spring);
+    }
+
+    .verdict-icon-badge.is-spam {
+      background: var(--danger-surface);
+      color: var(--danger-main);
+      border: 1px solid var(--danger-border);
+      box-shadow: 0 0 24px var(--danger-glow);
+    }
+
+    .verdict-icon-badge.is-safe {
+      background: var(--safe-surface);
+      color: var(--safe-main);
+      border: 1px solid var(--safe-border);
+      box-shadow: 0 0 24px var(--safe-glow);
+    }
+
+    .verdict-icon-badge.is-unsure {
+      background: var(--warn-surface);
+      color: var(--warn-main);
+      border: 1px solid var(--warn-border);
+    }
+
+    .verdict-icon-badge svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .verdict-text-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .verdict-label {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .verdict-label.is-spam { color: var(--danger-main); }
+    .verdict-label.is-safe { color: var(--safe-main); }
+    .verdict-label.is-unsure { color: var(--warn-main); }
+
+    .verdict-subtext {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .verdict-score-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+    }
+
+    .confidence-percentage {
+      font-size: 2.1rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .confidence-percentage.is-spam { color: var(--danger-main); }
+    .confidence-percentage.is-safe { color: var(--safe-main); }
+    .confidence-percentage.is-unsure { color: var(--warn-main); }
+
+    .confidence-sub-label {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-subtle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Confidence Bar */
+    .confidence-bar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .confidence-bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      color: var(--text-subtle);
+    }
+
+    .confidence-track {
+      width: 100%;
+      height: 10px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      position: relative;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: var(--radius-full);
+      transition: width 0.85s cubic-bezier(0.16, 1, 0.3, 1), background-color var(--duration-fast) ease;
+    }
+
+    .confidence-fill.is-spam {
+      background: linear-gradient(90deg, #f97316, var(--danger-main));
+      box-shadow: 0 0 12px var(--danger-glow);
+    }
+
+    .confidence-fill.is-safe {
+      background: linear-gradient(90deg, #06b6d4, var(--safe-main));
+      box-shadow: 0 0 12px var(--safe-glow);
+    }
+
+    .confidence-fill.is-unsure {
+      background: linear-gradient(90deg, #eab308, var(--warn-main));
+    }
+
+    .confidence-scale-markers {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: var(--text-subtle);
+      padding: 0 2px;
+    }
+
+    /* Source / Demo notice banner */
+    .source-notice-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.78rem;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .source-notice-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--bg-chip);
+      color: var(--accent-cyan);
+    }
+
+    /* "Why this result?" Explainability Section */
+    .why-section {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .why-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .signals-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    @keyframes signalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .signal-item {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color var(--duration-fast) ease, transform 0.2s var(--ease-spring), box-shadow 0.2s ease;
+    }
+
+    .results-card.active .signal-item {
+      animation: signalFadeIn 0.38s var(--ease-spring) both;
+    }
+
+    .results-card.active .signal-item:nth-child(1) { animation-delay: 0.06s; }
+    .results-card.active .signal-item:nth-child(2) { animation-delay: 0.12s; }
+    .results-card.active .signal-item:nth-child(3) { animation-delay: 0.18s; }
+    .results-card.active .signal-item:nth-child(4) { animation-delay: 0.24s; }
+    .results-card.active .signal-item:nth-child(5) { animation-delay: 0.30s; }
+
+    .signal-item:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .signal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .signal-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .severity-badge {
+      font-size: 0.68rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+    }
+
+    .severity-badge.high {
+      background: var(--danger-surface);
+      color: var(--danger-main);
+      border: 1px solid var(--danger-border);
+    }
+
+    .severity-badge.medium {
+      background: var(--warn-surface);
+      color: var(--warn-main);
+      border: 1px solid var(--warn-border);
+    }
+
+    .severity-badge.protective {
+      background: var(--safe-surface);
+      color: var(--safe-main);
+      border: 1px solid var(--safe-border);
+    }
+
+    .severity-badge.neutral {
+      background: var(--bg-chip);
+      color: var(--text-subtle);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .signal-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Result Action Buttons */
+    .result-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-size: 0.84rem;
+      font-weight: 500;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all var(--duration-fast) var(--ease-spring);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-chip);
+      transform: translateY(-1.5px);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       RECENT CHECKS SECTION (HISTORY)
+       ══════════════════════════════════════════════════════════════ */
+    .history-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .history-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .history-count {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg-chip);
+      color: var(--accent-cyan);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .history-item {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      cursor: pointer;
+      transition: transform 0.22s var(--ease-spring),
+                  border-color var(--duration-fast) ease,
+                  background-color var(--duration-fast) ease,
+                  box-shadow 0.22s ease;
+    }
+
+    .history-item:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-chip-hover);
+      transform: translateY(-1.5px) translateX(3px);
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .history-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .history-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .history-item-icon.is-spam {
+      background: var(--danger-surface);
+      color: var(--danger-main);
+    }
+
+    .history-item-icon.is-safe {
+      background: var(--safe-surface);
+      color: var(--safe-main);
+    }
+
+    .history-item-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .history-item-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .history-snippet {
+      font-size: 0.88rem;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-meta {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-subtle);
+    }
+
+    .history-item-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .history-score-tag {
+      font-size: 0.82rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+    }
+
+    .history-score-tag.is-spam { color: var(--danger-main); }
+    .history-score-tag.is-safe { color: var(--safe-main); }
+
+    .history-empty-state {
+      padding: 30px;
+      text-align: center;
+      color: var(--text-subtle);
+      font-size: 0.88rem;
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       TAB BAR + AUTHOR CHIP
+       ══════════════════════════════════════════════════════════════ */
+    .tabbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding: 6px 6px 6px 8px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position: sticky;
+      top: 10px;
+      z-index: 40;
+    }
+
+    .tabbar-tabs {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .tabbar-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tabbar-tab {
+      flex: 0 0 auto;
+      padding: 7px 13px;
+      border-radius: var(--radius-full);
+      font-size: 0.83rem;
+      font-weight: 550;
+      color: var(--text-muted);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color var(--duration-fast) ease,
+        background var(--duration-normal) var(--ease-spring);
+    }
+
+    .tabbar-tab:hover {
+      color: var(--text-main);
+      background: var(--bg-chip-hover);
+    }
+
+    .tabbar-tab.is-active {
+      color: var(--text-main);
+      background: var(--bg-chip);
+      box-shadow: inset 0 0 0 1px var(--border-strong);
+    }
+
+    .author-chip {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 11px 4px 4px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-elevated);
+      text-decoration: none;
+      transition: transform var(--duration-normal) var(--ease-spring),
+        border-color var(--duration-normal) ease,
+        box-shadow var(--duration-normal) ease;
+    }
+
+    .author-chip:hover {
+      transform: translateY(-1px);
+      border-color: var(--border-strong);
+      box-shadow: 0 8px 22px -10px var(--accent-glow);
+    }
+
+    .author-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-chip);
+      flex: 0 0 auto;
+    }
+
+    .author-meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .author-name {
+      font-size: 0.78rem;
+      font-weight: 650;
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+
+    .author-handle {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      color: var(--text-subtle);
+      white-space: nowrap;
+    }
+
+    .author-ext {
+      color: var(--text-subtle);
+      flex: 0 0 auto;
+      transition: color var(--duration-fast) ease;
+    }
+
+    .author-chip:hover .author-ext {
+      color: var(--accent-cyan);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       PRIVACY NOTE / DISTRACTOR PANEL / DISCLAIMER
+       ══════════════════════════════════════════════════════════════ */
+    .privacy-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      margin-bottom: 12px;
+      padding: 8px 11px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-chip);
+      font-size: 0.755rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .privacy-note svg {
+      flex: 0 0 auto;
+      margin-top: 1px;
+      color: var(--accent-cyan);
+    }
+
+    .privacy-note strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .distractor-panel {
+      margin-top: 14px;
+      padding: 13px 15px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      background: var(--bg-chip);
+    }
+
+    .distractor-panel.is-warn {
+      border-color: var(--danger-border);
+      background: var(--danger-surface);
+    }
+
+    .distractor-head {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.83rem;
+      font-weight: 650;
+      color: var(--safe-main);
+      margin-bottom: 6px;
+    }
+
+    .distractor-panel.is-warn .distractor-head {
+      color: var(--danger-main);
+    }
+
+    .distractor-body {
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .distractor-body strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .disclaimer {
+      margin-top: 26px;
+      padding: 13px 15px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-surface);
+      font-size: 0.79rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .disclaimer strong {
+      color: var(--text-main);
+      font-weight: 650;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SAFETY RULES + REPORT FRAUD SECTIONS
+       ══════════════════════════════════════════════════════════════ */
+    .info-section {
+      margin-top: 34px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border-subtle);
+      scroll-margin-top: 24px;
+    }
+
+    .info-head {
+      max-width: 760px;
+      margin-bottom: 20px;
+    }
+
+    .info-head h2 {
+      font-size: clamp(1.25rem, 3.2vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .info-head p {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+      gap: 14px;
+    }
+
+    .info-card {
+      position: relative;
+      padding: 20px 18px 18px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      transition: transform var(--duration-normal) var(--ease-spring),
+        border-color var(--duration-normal) ease,
+        box-shadow var(--duration-normal) ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: 0 12px 30px -12px var(--accent-glow);
+    }
+
+    .info-card-num {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      color: var(--accent-cyan);
+      opacity: 0.85;
+      margin-bottom: 10px;
+    }
+
+    .info-card h3 {
+      font-size: 0.98rem;
+      font-weight: 650;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      line-height: 1.35;
+    }
+
+    .info-card p {
+      font-size: 0.845rem;
+      line-height: 1.62;
+      color: var(--text-muted);
+    }
+
+    .eval-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      background: var(--bg-chip);
+    }
+
+    .eval-dot {
+      flex: 0 0 auto;
+      width: 9px;
+      height: 9px;
+      margin-top: 6px;
+      border-radius: 50%;
+      background: var(--warn-main);
+      box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.16);
+      animation: eval-pulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes eval-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.16);
+      }
+
+      50% {
+        box-shadow: 0 0 0 7px rgba(245, 158, 11, 0.05);
+      }
+    }
+
+    .eval-body strong {
+      display: block;
+      font-size: 0.87rem;
+      font-weight: 650;
+      color: var(--text-main);
+      margin-bottom: 5px;
+    }
+
+    .eval-body p {
+      font-size: 0.815rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .eval-caveats {
+      margin: 10px 0 0;
+      padding: 0 0 0 2px;
+      list-style: none;
+      font-size: 0.79rem;
+      line-height: 1.58;
+      color: var(--text-muted);
+    }
+
+    .eval-caveats li {
+      position: relative;
+      padding-left: 15px;
+      margin-bottom: 7px;
+    }
+
+    .eval-caveats li:last-child {
+      margin-bottom: 0;
+    }
+
+    .eval-caveats li::before {
+      content: "";
+      position: absolute;
+      left: 2px;
+      top: 0.52em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      opacity: 0.75;
+    }
+
+    .eval-body b {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .info-callout {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-left: 3px solid var(--accent-cyan);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      background: var(--bg-chip);
+      font-size: 0.865rem;
+      line-height: 1.6;
+      color: var(--text-main);
+    }
+
+    /* Report grid */
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .report-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 18px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      text-decoration: none;
+      transition: transform var(--duration-normal) var(--ease-spring),
+        border-color var(--duration-normal) ease,
+        box-shadow var(--duration-normal) ease;
+    }
+
+    .report-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: 0 14px 34px -14px var(--accent-glow);
+    }
+
+    .report-urgent {
+      border-color: var(--danger-border);
+      background: var(--danger-surface);
+    }
+
+    .report-tag {
+      font-family: var(--font-mono);
+      font-size: 0.63rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-subtle);
+    }
+
+    .report-urgent .report-tag {
+      color: var(--danger-main);
+    }
+
+    .report-cta {
+      font-size: 1.35rem;
+      font-weight: 750;
+      letter-spacing: -0.02em;
+      color: var(--accent-cyan);
+      line-height: 1.15;
+    }
+
+    .report-urgent .report-cta {
+      color: var(--danger-main);
+      font-size: 1.7rem;
+    }
+
+    .report-body strong {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 650;
+      color: var(--text-main);
+      margin-bottom: 5px;
+    }
+
+    .report-body p {
+      font-size: 0.82rem;
+      line-height: 1.58;
+      color: var(--text-muted);
+    }
+
+    .report-link {
+      display: inline-block;
+      margin-top: 7px;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      color: var(--accent-primary);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       FOOTER
+       ══════════════════════════════════════════════════════════════ */
+    footer.app-footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 30px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color var(--duration-fast) ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-cyan);
+    }
+
+    /* Safety / Report sections: tighten hard on small screens. No horizontal
+       scroll, no stacked vertical waste -- cards go single column with reduced
+       padding and the oversized helpline CTA shrinks so it cannot push layout. */
+    @media (max-width: 640px) {
+      /* Tab bar: tabs scroll horizontally, author chip collapses to avatar only
+         so the row never wraps or wastes vertical space. */
+      .tabbar {
+        padding: 5px 5px 5px 6px;
+        gap: 8px;
+        top: 8px;
+        margin-bottom: 12px;
+      }
+
+      .tabbar-tab {
+        padding: 6px 11px;
+        font-size: 0.79rem;
+      }
+
+      .author-chip {
+        padding: 3px;
+        gap: 0;
+      }
+
+      .author-meta,
+      .author-ext {
+        display: none;
+      }
+
+      .author-avatar {
+        width: 26px;
+        height: 26px;
+      }
+
+      .privacy-note {
+        font-size: 0.73rem;
+        padding: 7px 9px;
+        margin-bottom: 10px;
+      }
+
+      .distractor-panel {
+        padding: 11px 12px;
+        margin-top: 11px;
+      }
+
+      .distractor-head {
+        font-size: 0.79rem;
+      }
+
+      .distractor-body {
+        font-size: 0.76rem;
+      }
+
+      .disclaimer {
+        margin-top: 20px;
+        padding: 11px 13px;
+        font-size: 0.75rem;
+      }
+
+      .info-section {
+        margin-top: 24px;
+        padding-top: 22px;
+      }
+
+      .info-head {
+        margin-bottom: 14px;
+      }
+
+      .info-head p {
+        font-size: 0.85rem;
+      }
+
+      .info-grid,
+      .report-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .info-card {
+        padding: 14px 14px 13px;
+      }
+
+      .info-card h3 {
+        font-size: 0.92rem;
+        margin-bottom: 5px;
+      }
+
+      .info-card p {
+        font-size: 0.82rem;
+        line-height: 1.55;
+      }
+
+      .info-card-num {
+        margin-bottom: 6px;
+      }
+
+      .report-card {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 14px;
+      }
+
+      .report-card .report-tag {
+        display: none;
+      }
+
+      .report-cta {
+        flex: 0 0 78px;
+        font-size: 1rem;
+        text-align: center;
+      }
+
+      .report-urgent .report-cta {
+        font-size: 1.25rem;
+      }
+
+      .report-body strong {
+        font-size: 0.87rem;
+      }
+
+      .report-body p {
+        font-size: 0.79rem;
+        line-height: 1.5;
+      }
+
+      .eval-banner {
+        padding: 11px 12px;
+        gap: 9px;
+        margin-bottom: 12px;
+      }
+
+      .eval-body strong {
+        font-size: 0.81rem;
+      }
+
+      .eval-body p {
+        font-size: 0.77rem;
+      }
+
+      .info-callout {
+        margin-top: 12px;
+        padding: 11px 13px;
+        font-size: 0.82rem;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        gap: 10px 14px;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ACCESSIBILITY, FOCUS STATES & REDUCED MOTION
+       ══════════════════════════════════════════════════════════════ */
+    :focus-visible {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 3px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .ambient-orb, .scan-laser, .radar-icon-wrap::after {
+        display: none !important;
+      }
+      .glass-card:hover, .sample-chip:hover, .history-item:hover {
+        transform: none !important;
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       MOBILE RESPONSIVE RULES (Space-Efficient & Touch-Optimized)
+       ══════════════════════════════════════════════════════════════ */
+    @media (max-width: 640px) {
+      .app-shell {
+        padding: 0 14px 44px;
+        gap: 16px; /* Eliminates the massive vertical gap between sections */
+      }
+
+      /* Compact, space-saving Header */
+      header.app-header {
+        padding: 12px 0 10px;
+        margin-bottom: 0;
+      }
+
+      .brand-logo-frame {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+      }
+
+      .brand-name {
+        font-size: 1.12rem;
+        gap: 6px;
+      }
+
+      .brand-tag {
+        font-size: 0.62rem;
+        padding: 2px 5px;
+      }
+
+      .connection-badge {
+        padding: 5px 9px;
+        font-size: 0.72rem;
+      }
+
+      .connection-badge span:last-child {
+        display: none;
+      }
+
+      .theme-toggle-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      /* Compact Hero Section (No wasted top space) */
+      .hero-section {
+        margin: 2px auto 0;
+        gap: 8px;
+        max-width: 100%;
+      }
+
+      .hero-pill {
+        padding: 4px 11px;
+        font-size: 0.7rem;
+        letter-spacing: 0.04em;
+        gap: 6px;
+      }
+
+      .hero-pill svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      .hero-title {
+        font-size: clamp(1.62rem, 6.6vw, 2.05rem);
+        line-height: 1.15;
+        letter-spacing: -0.025em;
+        margin-bottom: 0;
+      }
+
+      .hero-desc {
+        font-size: 0.85rem;
+        line-height: 1.45;
+        max-width: 100%;
+        margin: 0;
+      }
+
+      /* Compact Analyzer Card */
+      .analyzer-card {
+        padding: 16px 14px;
+        gap: 12px;
+        border-radius: var(--radius-md);
+      }
+
+      .analyzer-header {
+        gap: 8px;
+      }
+
+      .card-label {
+        font-size: 0.84rem;
+      }
+
+      .message-textarea {
+        min-height: 105px;
+        padding: 12px 14px;
+        font-size: 0.92rem;
+        line-height: 1.5;
+      }
+
+      .analyzer-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding-top: 0;
+      }
+
+      .meta-indicators {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        font-size: 0.72rem;
+      }
+
+      .meta-pill {
+        padding: 2px 7px;
+      }
+
+      .btn-analyze {
+        width: 100%;
+        padding: 11px 18px;
+        font-size: 0.92rem;
+        justify-content: center;
+      }
+
+      /* Single-row Horizontal Scroll for Sample Messages (Saves ~90% vertical space) */
+      .samples-wrap {
+        margin-top: -4px;
+        gap: 6px;
+      }
+
+      .samples-title {
+        font-size: 0.74rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .samples-hint-mobile {
+        display: inline-flex;
+        font-size: 0.68rem;
+        color: var(--accent-cyan);
+        font-family: var(--font-mono);
+        font-weight: 500;
+        text-transform: none;
+        letter-spacing: normal;
+        animation: pulseHint 2s infinite ease-in-out;
+      }
+
+      @keyframes pulseHint {
+        0%, 100% { opacity: 0.75; transform: translateX(0); }
+        50% { opacity: 1; transform: translateX(2px); }
+      }
+
+      .samples-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        scrollbar-width: none;
+        padding: 2px 14px 6px 14px;
+        margin: 0 -14px;
+        gap: 8px;
+      }
+
+      .samples-grid::-webkit-scrollbar {
+        display: none;
+      }
+
+      .sample-chip {
+        flex-shrink: 0;
+        white-space: nowrap;
+        scroll-snap-align: start;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        gap: 6px;
+      }
+
+      /* Compact Results Card */
+      .results-card {
+        padding: 18px 14px;
+        gap: 16px;
+        border-radius: var(--radius-md);
+      }
+
+      .verdict-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding-bottom: 14px;
+      }
+
+      .verdict-main-group {
+        gap: 12px;
+      }
+
+      .verdict-icon-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-md);
+      }
+
+      .verdict-icon-badge svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .verdict-label {
+        font-size: 1.35rem;
+      }
+
+      .confidence-percentage {
+        font-size: 1.75rem;
+      }
+
+      .signals-list {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+
+      .signal-item {
+        padding: 11px 13px;
+      }
+
+      /* Compact History Card */
+      .history-card {
+        padding: 16px 14px;
+        gap: 14px;
+        border-radius: var(--radius-md);
+      }
+
+      .history-item {
+        padding: 10px 12px;
+      }
+
+      .history-snippet {
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Animated Subtle Blue Glow Orbs (Pure CSS, calm, lightweight) -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+    <div class="ambient-orb orb-3"></div>
+    <div class="ambient-orb orb-4"></div>
+  </div>
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <!-- ── Header ── -->
+    <header class="app-header">
+      <a href="#" class="brand-wrap" aria-label="Spam Shield Home">
+        <div class="brand-logo-frame">
+          <img src="/assets/logo.png" alt="Spam Shield Logo" class="brand-logo-img" />
+        </div>
+        <div class="brand-text-block">
+          <span class="brand-name">
+            Spam Shield
+            <span class="brand-tag">ML v1.0</span>
+          </span>
+        </div>
+      </a>
+
+      <div class="header-controls">
+        <!-- API Connection Status Badge -->
+        <div class="connection-badge" id="apiStatusBadge" title="Click to re-check API connection">
+          <span class="connection-dot" id="apiStatusDot"></span>
+          <span id="apiStatusText">Checking API...</span>
+        </div>
+
+        <!-- Light / Dark Theme Toggle Button -->
+        <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle between dark and light theme" title="Toggle theme (T)">
+          <svg class="icon-moon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── Hero Section ── -->
+    <section class="hero-section">
+      <div class="hero-pill">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        AI-Powered Scam & Phishing Defense
+      </div>
+      <h1 class="hero-title">
+        Know what’s hiding in <span>your messages.</span>
+      </h1>
+      <p class="hero-desc">
+        Evaluate SMS, OTP requests, and chat alerts across English, Hindi, and Hinglish. Uncover deceptive phishing links, urgency traps, and impersonation schemes before you tap.
+      </p>
+    </section>
+
+    <!-- ── Section tabs + author ── -->
+    <nav class="tabbar" aria-label="Sections">
+      <div class="tabbar-tabs" role="tablist">
+        <a class="tabbar-tab is-active" href="#analyzer" role="tab" aria-selected="true">Analyze</a>
+        <a class="tabbar-tab" href="#safety" role="tab" aria-selected="false">Safety Rules</a>
+        <a class="tabbar-tab" href="#report" role="tab" aria-selected="false">Report Fraud</a>
+        <a class="tabbar-tab" href="#about" role="tab" aria-selected="false" id="aboutTabLink">Engine</a>
+      </div>
+      <a class="author-chip" href="https://github.com/Dineswarkumar"
+         target="_blank" rel="noopener"
+         title="View Dineswarkumar's GitHub profile">
+        <img class="author-avatar"
+             src="https://avatars.githubusercontent.com/u/194705652?v=4"
+             alt="Dineswara kumar" loading="lazy" decoding="async" />
+        <span class="author-meta">
+          <span class="author-name">Dineswara kumar</span>
+          <span class="author-handle">@Dineswarkumar</span>
+        </span>
+        <svg class="author-ext" width="13" height="13" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+          <polyline points="15 3 21 3 21 9"></polyline>
+          <line x1="10" y1="14" x2="21" y2="3"></line>
+        </svg>
+      </a>
+    </nav>
+
+    <!-- ── Main Input Card ── -->
+    <main id="analyzer">
+      <section class="glass-card analyzer-card" aria-label="Message Analyzer">
+        <div class="analyzer-header">
+          <span class="card-label">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Inbound Message Inspector
+          </span>
+          <div class="card-actions-quick">
+            <button class="btn-ghost-sm" id="pasteBtn" type="button" title="Paste from clipboard">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+              </svg>
+              Paste
+            </button>
+            <button class="btn-ghost-sm" id="clearBtn" type="button" title="Clear message input (Esc)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="textarea-container">
+          <textarea
+            id="messageInput"
+            class="message-textarea"
+            maxlength="10000"
+            placeholder="Paste suspicious SMS, Telegram, WhatsApp or email text here (e.g. 'Your HDFC account has been suspended. Click here to verify KYC immediately...')"
+            aria-label="Message text to analyze"
+            spellcheck="false"
+          ></textarea>
+        </div>
+
+        <div class="privacy-note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>
+            Processed on the server for analysis and <strong>never stored or logged</strong>.
+            Don't paste live OTPs or passwords.
+          </span>
+        </div>
+
+        <div class="analyzer-footer">
+          <div class="meta-indicators">
+            <span class="meta-pill" id="charCountDisplay">0 characters</span>
+            <span class="meta-pill" id="detectedLangDisplay">Language: Auto-detect</span>
+            <span class="meta-pill" style="display: none;" id="segmentCountDisplay">1 SMS</span>
+          </div>
+
+          <button class="btn-analyze" id="analyzeBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>Analyze Message</span>
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <!-- ── Sample Messages to Try ── -->
+    <section class="samples-wrap" aria-label="Sample Messages">
+      <div class="samples-title">
+        <div class="samples-title-left">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Try Sample Scenarios:</span>
+        </div>
+        <span class="samples-hint-mobile">Swipe to test &rarr;</span>
+      </div>
+      <div class="samples-grid" id="samplesContainer">
+        <!-- Sample chips injected dynamically -->
+      </div>
+    </section>
+
+    <!-- ── Loading Scanning State ── -->
+    <section class="glass-card scanner-card" id="scannerCard" aria-live="polite" aria-label="Analysis in progress">
+      <div class="scan-laser" aria-hidden="true"></div>
+      <div class="radar-icon-wrap">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <path d="M12 8v4"></path>
+          <path d="M12 16h.01"></path>
+        </svg>
+      </div>
+      <div>
+        <h3 class="scanning-title">Scanning message architecture...</h3>
+        <p class="scanning-status-text" id="scanningStatusText">Evaluating linguistic patterns and token entropy...</p>
+      </div>
+    </section>
+
+    <!-- ── Results Card ── -->
+    <section class="glass-card results-card" id="resultsCard" aria-live="polite" aria-label="Analysis results">
+      <!-- Verdict Top Banner -->
+      <div class="verdict-header">
+        <div class="verdict-main-group">
+          <div class="verdict-icon-badge is-spam" id="verdictIconBadge">
+            <!-- Icon injected dynamically -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <div class="verdict-text-block">
+            <h2 class="verdict-label is-spam" id="verdictHeading">Likely Scam</h2>
+            <p class="verdict-subtext" id="verdictDescription">Critical scam and phishing indicators detected.</p>
+          </div>
+        </div>
+
+        <div class="verdict-score-group">
+          <span class="confidence-percentage is-spam" id="confidenceValue">94%</span>
+          <span class="confidence-sub-label">Confidence Rating</span>
+        </div>
+      </div>
+
+      <!-- Confidence Bar Meter -->
+      <div class="confidence-bar-section">
+        <div class="confidence-bar-header">
+          <span>Threat Likelihood Assessment</span>
+          <span id="confidenceStatusLabel">High Risk</span>
+        </div>
+        <div class="confidence-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="94" id="confidenceTrack">
+          <div class="confidence-fill is-spam" id="confidenceFill" style="width: 94%;"></div>
+        </div>
+        <div class="confidence-scale-markers">
+          <span>0% Safe</span>
+          <span>35% Review</span>
+          <span>65% Suspicious</span>
+          <span>100% Threat</span>
+        </div>
+      </div>
+
+      <!-- Transparency & Mode Banner -->
+      <div class="source-notice-bar" id="sourceNoticeBar">
+        <span id="sourceNoticeText">Demo Mode Result — Heuristic evaluation running locally.</span>
+        <span class="source-notice-tag" id="sourceNoticeTag">Demo Heuristics</span>
+      </div>
+
+      <!-- "Why this result?" Explainability Section -->
+      <div class="why-section">
+        <h3 class="why-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-cyan);">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          Why this result? Signal Breakdown
+        </h3>
+        <div class="signals-list" id="signalsContainer">
+          <!-- Dynamic signals injected -->
+        </div>
+      </div>
+
+      <!-- Actions Footer -->
+      <div class="result-actions">
+        <button class="btn-secondary" id="copyReportBtn" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+          Copy Analysis Report
+        </button>
+        <button class="btn-secondary" id="resetBtn" type="button">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+          </svg>
+          Test Another Message
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Recent Checks History Section ── -->
+    <section class="glass-card history-card" aria-label="Recent Checks History">
+      <div class="history-header">
+        <div class="history-title-group">
+          <h2 class="history-title">Recent Checks</h2>
+          <span class="history-count" id="historyCountBadge">3 saved</span>
+        </div>
+        <button class="btn-ghost-sm" id="clearHistoryBtn" type="button" title="Clear saved history">
+          Clear History
+        </button>
+      </div>
+
+      <div class="history-list" id="historyListContainer">
+        <!-- History items dynamically populated -->
+      </div>
+    </section>
+
+    <div id="distractorPanel" class="distractor-panel" style="display:none;"></div>
+
+    <!-- ── Safety Rules ── -->
+    <section class="info-section" id="safety">
+      <div class="info-head">
+        <h2>Safety Rules</h2>
+        <p>
+          Four rules that prevent almost every SMS fraud. These apply before any
+          classifier runs — no model should be your first defence.
+        </p>
+      </div>
+
+      <div class="info-grid">
+        <article class="info-card">
+          <div class="info-card-num">01</div>
+          <h3>Never share an OTP — for anyone</h3>
+          <p>
+            No bank, no payment app, no delivery service, and no police officer
+            will ever ask you to read out or forward a one-time password. An OTP
+            authorises a transaction. Anyone who asks for it is trying to spend
+            your money, whoever they claim to be.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="info-card-num">02</div>
+          <h3>Urgency is the tell</h3>
+          <p>
+            "Your account will be closed in 24 hours", "act now", "last warning"
+            — real institutions give you time to verify. Fraud creates a deadline
+            so you act before you think. Slow down. A real bank can wait.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="info-card-num">03</div>
+          <h3>Open the app yourself</h3>
+          <p>
+            Never use a link in an SMS to log into a bank. Type the address in
+            your browser or open the installed app. A link in a message is the
+            single easiest way to be redirected to a convincing fake login page.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="info-card-num">04</div>
+          <h3>Authority is fakeable</h3>
+          <p>
+            Caller ID and sender names can be spoofed. Police, the Cyber Cell,
+            the CBI and delivery companies do not demand UPI payments or threaten
+            arrest over SMS. Hang up and call the official helpline yourself.
+          </p>
+        </article>
+      </div>
+
+      <div class="info-callout">
+        <strong>If it looks urgent, financial, or authoritative — assume it is fraud until verified independently.</strong>
+      </div>
+    </section>
+
+    <!-- ── Report Fraud ── -->
+    <section class="info-section" id="report">
+      <div class="info-head">
+        <h2>Report Fraud &amp; Get Help</h2>
+        <p>
+          Official Indian government channels. Use the one that matches what
+          happened. Do not report to any number or link sent to you in the
+          suspect message.
+        </p>
+      </div>
+
+      <div class="report-grid">
+        <a class="report-card report-urgent" href="tel:1930">
+          <div class="report-tag">Emergency · 24×7</div>
+          <div class="report-cta">1930</div>
+          <div class="report-body">
+            <strong>Cyber Financial Fraud Helpline</strong>
+            <p>
+              Call immediately if you have shared an OTP, approved a payment, or
+              lost money to a scam. Earlier reporting recovers more money.
+              Operated 24×7 by the Ministry of Home Affairs.
+            </p>
+          </div>
+        </a>
+
+        <a class="report-card" href="tel:112">
+          <div class="report-tag">Emergency</div>
+          <div class="report-cta">112</div>
+          <div class="report-body">
+            <strong>National Police Helpline</strong>
+            <p>
+              Any other crime, or if you are in immediate danger. Single emergency
+              number across India.
+            </p>
+          </div>
+        </a>
+
+        <a class="report-card" href="https://cybercrime.gov.in/" target="_blank" rel="noopener">
+          <div class="report-tag">Online · Government of India</div>
+          <div class="report-cta">Report a complaint</div>
+          <div class="report-body">
+            <strong>National Cyber Crime Reporting Portal</strong>
+            <p>
+              Ministry of Home Affairs. File online, attach screenshots, and track
+              your complaint. Also allows <em>Report Suspect</em> — you can submit
+              a phishing URL, fake WhatsApp number or SMS sender for takedown.
+            </p>
+            <span class="report-link">cybercrime.gov.in</span>
+          </div>
+        </a>
+
+        <a class="report-card" href="https://cybercrime.gov.in/Webform/suspect_search_repository.aspx" target="_blank" rel="noopener">
+          <div class="report-tag">Check before you trust</div>
+          <div class="report-cta">Suspect Repository</div>
+          <div class="report-body">
+            <strong>Search a number, email or URL</strong>
+            <p>
+              Before you reply or pay, search the identifier here. If fraudsters
+              have already been reported, it will already be in the repository.
+            </p>
+          </div>
+        </a>
+
+        <a class="report-card" href="https://www.npci.org.in/upi-complaint" target="_blank" rel="noopener">
+          <div class="report-tag">Money · UPI</div>
+          <div class="report-cta">UPI dispute</div>
+          <div class="report-body">
+            <strong>NPCl UPI Dispute Redressal</strong>
+            <p>
+              For unauthorised UPI transactions. For outright fraud, raise it with
+              your bank first — they are the ones who must reverse the credit.
+            </p>
+          </div>
+        </a>
+
+        <a class="report-card" href="https://consumerhelpline.gov.in/" target="_blank" rel="noopener">
+          <div class="report-tag">Consumer · Ministry of Consumer Affairs</div>
+          <div class="report-cta">1915</div>
+          <div class="report-body">
+            <strong>National Consumer Helpline</strong>
+            <p>
+              Unfair telecom or service conduct, fraudulent subscriptions, and
+              other consumer grievances. Also on WhatsApp/SMS on 8800001915.
+            </p>
+          </div>
+        </a>
+
+        <a class="report-card" href="https://trai.gov.in/faqcategory/complaint" target="_blank" rel="noopener">
+          <div class="report-tag">Telecom · TRAI</div>
+          <div class="report-cta">Escalate</div>
+          <div class="report-body">
+            <strong>SMS or call from a service provider</strong>
+            <p>
+              If your operator does not resolve it, TRAI explains how to appeal to
+              the provider's appellate authority.
+            </p>
+          </div>
+        </a>
+
+        <a class="report-card" href="https://www.rbi.org.in/" target="_blank" rel="noopener">
+          <div class="report-tag">Banking · RBI</div>
+          <div class="report-cta">Banking fraud</div>
+          <div class="report-body">
+            <strong>Reserve Bank of India</strong>
+            <p>
+              Unauthorised electronic funds transfers and banking fraud. Your bank
+              must be informed first — call its 24-hour helpline immediately.
+            </p>
+          </div>
+        </a>
+      </div>
+
+      <div class="info-callout">
+        <strong>Do not report to any contact detail inside the suspicious message.</strong>
+        Scammers supply "official looking" helplines that lead straight back to
+        them. Only use numbers published on a government website.
+      </div>
+    </section>
+
+    <!-- ── About the detection engine ── -->
+    <section class="info-section" id="about">
+      <div class="info-head">
+        <h2>About the Detection Engine</h2>
+        <p>
+          What the classifier actually is, how it was measured, and what it
+          cannot do. The short version: a character n-gram TF-IDF fed into a
+          logistic regression, trained on ~19,200 labelled messages and grouped
+          so no message template appears in both train and test.
+        </p>
+      </div>
+
+      <div class="eval-banner" id="evalBanner">
+        <div class="eval-dot"></div>
+        <div class="eval-body">
+          <strong>Evaluation status: <span id="evalStatusText">indicative — human-reviewed disagreements, one annotator</span></strong>
+          <p>
+            <b>74.4% accuracy, 74.4% macro-F1</b> on 305 messages labelled by hand.
+            One person labelled them. There is no second annotator, so there is
+            no Cohen's kappa — this measures agreement with one person's
+            judgement, not with an agreed gold standard. The annotator has
+            reviewed the 78 disagreements; treat the score as indicative.
+          </p>
+          <ul class="eval-caveats">
+            <li>
+              <b>This is the hardest slice we could build, not a random sample
+              of SMS.</b> The messages were drawn from the review queue — the
+              ones the corpus labeller itself refused to decide — stratified by
+              language and source.
+            </li>
+            <li>
+              <b>Do not compare it to the 91.9% validation score.</b> On
+              ordinary grouped held-out data the model scores 91.9% macro-F1.
+              Both numbers are true; they answer different questions.
+            </li>
+            <li>
+              <b>By language:</b> English 75.0% (n=196), Hinglish 72.0%
+              (n=75), Tenglish 100% (n=21), Hindi 38.5% (n=13). The Hindi and
+              Tenglish slices are far too small to support a claim.
+            </li>
+            <li>
+              <b>5 messages labelled "undecidable" were excluded</b>, counted
+              neither right nor wrong. The annotator has reviewed the 78 initial
+              disagreements. This review does not provide a second independent
+              label or inter-annotator agreement; the published score is still
+              measured against the original labels.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <article class="info-card">
+          <div class="info-card-num">MODEL</div>
+          <h3>What it is</h3>
+          <p>
+            Character 2–5 grams over the raw text, fed to a logistic
+            regression that emits real probabilities directly — so the
+            confidence you see is the model's own, not a sigmoid fitted
+            on top of another model. Character n-grams carry the
+            Devanagari and Telugu text, where whitespace tokenisation
+            fails, and the romanized Hinglish and Tenglish registers. Word
+            n-grams were removed on purpose: they latch onto "blocked",
+            "verify" and "account" and flag genuine bank alerts, which is
+            the exact failure this tool exists to prevent.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="info-card-num">CLASSES</div>
+          <h3>What it decides</h3>
+          <p>
+            <strong>Legitimate</strong> — expected personal, delivery or
+            transactional message.<br />
+            <strong>Marketing spam</strong> — unsolicited advertising with no
+            attempt to take money or credentials.<br />
+            <strong>Scam</strong> — pressures you to send money, reveal an OTP,
+            or open a malicious link. When a message is both promotional
+            <em>and</em> fraudulent, it is a scam.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="info-card-num">EVALUATION</div>
+          <h3>How it was measured</h3>
+          <p>
+            Every dataset was audited before use. Several claimed far more rows
+            than they held — one "10,000 message" dataset contains 743 unique
+            messages, and another "multilingual" set contains zero Hinglish.
+            Splits are grouped by message template, not by row, so the model is
+            never tested on phrasing it memorised. The final model choice was
+            re-run across several independent grouped splits, because a
+            difference that small is usually noise rather than a real gain.
+          </p>
+        </article>
+
+        <article class="info-card">
+          <div class="info-card-num">LIMITS</div>
+          <h3>What it cannot do</h3>
+          <p>
+            Tenglish and Hindi coverage is synthetic and has not been reviewed by
+            a native speaker. A portion of the corpus is still in an
+            <em>unsure</em> queue and excluded from training. The line between
+            marketing and fraud is a judgement call, not a fact, and the model
+            inherits every error in the labels it was given.
+          </p>
+          <p>
+            The published score rests on one annotator. Two rows were also found
+            carrying contradictory labels against identical sibling messages and
+            are reported uncorrected, because quietly fixing the gold set is how
+            a benchmark stops meaning anything.
+          </p>
+        </article>
+      </div>
+
+      <div class="info-callout">
+        <strong>Signals shown on a result are not all the same thing.</strong>
+        A <em>model</em> signal is the classifier's own output. A <em>rule</em>
+        signal is a narrow pattern match that can be disputed. Both are shown
+        separately so you can see which one drove the verdict.
+      </div>
+    </section>
+
+    <div class="disclaimer">
+        <strong>This is a student prototype, not a security product.</strong>
+        It can be wrong. Never rely on it to decide whether to trust a message —
+        verify independently through an official channel, especially for banking,
+        identity or payments. If something feels off, treat it as fraud until proven otherwise.
+      </div>
+
+    <!-- ── Footer ── -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <span>© 2026 Spam Shield · Multilingual Threat Intelligence</span>
+      </div>
+      <div class="footer-links">
+        <a href="#safety">Safety Rules</a>
+        <a href="#report">Report Fraud</a>
+        <a href="https://github.com/Dineswarkumar" target="_blank" rel="noopener">GitHub</a>
+        <a href="#about" id="aboutModalTrigger">About Detection Engine</a>
+        <a href="api/CONTRACT.md" target="_blank" rel="noopener">API Contract</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       APPLICATION LOGIC & CLIENT-SIDE DETECTOR SERVICE
+       ══════════════════════════════════════════════════════════════ -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ── DOM Element Cache ──
+      const $ = (id) => document.getElementById(id);
+      const root = document.documentElement;
+
+      const themeToggleBtn = $('themeToggleBtn');
+      const apiStatusBadge = $('apiStatusBadge');
+      const apiStatusDot = $('apiStatusDot');
+      const apiStatusText = $('apiStatusText');
+
+      const messageInput = $('messageInput');
+      const charCountDisplay = $('charCountDisplay');
+      const detectedLangDisplay = $('detectedLangDisplay');
+      const clearBtn = $('clearBtn');
+      const pasteBtn = $('pasteBtn');
+      const analyzeBtn = $('analyzeBtn');
+
+      const scannerCard = $('scannerCard');
+      const scanningStatusText = $('scanningStatusText');
+
+      const resultsCard = $('resultsCard');
+      const verdictIconBadge = $('verdictIconBadge');
+      const verdictHeading = $('verdictHeading');
+      const verdictDescription = $('verdictDescription');
+      const confidenceValue = $('confidenceValue');
+      const confidenceStatusLabel = $('confidenceStatusLabel');
+      const confidenceFill = $('confidenceFill');
+      const confidenceTrack = $('confidenceTrack');
+      const sourceNoticeBar = $('sourceNoticeBar');
+      const sourceNoticeText = $('sourceNoticeText');
+      const sourceNoticeTag = $('sourceNoticeTag');
+      const signalsContainer = $('signalsContainer');
+      const copyReportBtn = $('copyReportBtn');
+      const resetBtn = $('resetBtn');
+
+      const samplesContainer = $('samplesContainer');
+      const historyListContainer = $('historyListContainer');
+      const historyCountBadge = $('historyCountBadge');
+      const clearHistoryBtn = $('clearHistoryBtn');
+
+      // ── API & Configuration ──
+      const CONFIG = {
+        // Served by FastAPI at /app in local and deployed use. Keep a localhost
+        // fallback so opening this file directly still reaches a local API.
+        apiBase: window.location.protocol === 'file:'
+          ? 'http://127.0.0.1:8000'
+          : window.location.origin,
+        predictPath: '/predict',
+        healthPath: '/health',
+        // Free-tier hosts cold-start. Retry once with a long budget rather than
+        // silently degrading to keyword heuristics on the first request.
+        predictTimeoutMs: 4000,
+        coldStartTimeoutMs: 60000,
+        retryOnColdStart: true,
+        isApiOnline: false,
+        lastReportData: null
+      };
+      let apiHealthPromise = null;
+
+      // ── Theme Switcher ──
+      function setTheme(theme) {
+        root.dataset.theme = theme;
+        try {
+          localStorage.setItem('spam-shield-theme', theme);
+        } catch (e) { /* ignore private mode restrictions */ }
+      }
+
+      themeToggleBtn.addEventListener('click', () => {
+        const currentTheme = root.dataset.theme === 'light' ? 'light' : 'dark';
+        const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+        setTheme(nextTheme);
+      });
+
+      // Keyboard shortcut for theme toggle ('T' key when not focused in textarea)
+      window.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 't' && document.activeElement !== messageInput && !e.ctrlKey && !e.metaKey) {
+          themeToggleBtn.click();
+        }
+      });
+
+      // ── Language & Script Detection ──
+      const SCRIPT_REGEX = {
+        deva: /[\u0900-\u097F]/,
+        telu: /[\u0C00-\u0C7F]/
+      };
+
+      const HINGLISH_MARKERS = new Set([
+        'aapka', 'aapki', 'karein', 'karo', 'kare', 'hai', 'hain', 'abhi', 'turant',
+        'nahi', 'nhi', 'bhejo', 'kro', 'gaya', 'raha', 'aapko', 'liye', 'se', 'mein',
+        'paisa', 'khata', 'aavedan', 'jaldi', 'dhyan', 'inaam', 'dein', 'kijiye'
+      ]);
+
+      const TENGLISH_MARKERS = new Set([
+        'nuvvu', 'meeku', 'mee', 'undi', 'cheppu', 'kavali', 'pani', 'ayina', 'ghani',
+        'pettandi', 'ledu', 'ekkadiki', 'tarvatha', 'okkati', 'rendu', 'vaa', 'nundi'
+      ]);
+
+      function detectLanguage(text) {
+        if (!text || !text.trim()) return { code: 'unknown', name: 'Auto-detect' };
+        if (SCRIPT_REGEX.telu.test(text)) return { code: 'telu', name: 'తెలుగు (Telugu)' };
+        if (SCRIPT_REGEX.deva.test(text)) return { code: 'deva', name: 'हिन्दी (Devanagari)' };
+
+        const words = (text.toLowerCase().match(/[a-z]+/g) || []);
+        let hiCount = 0;
+        let teCount = 0;
+
+        for (const w of words) {
+          if (HINGLISH_MARKERS.has(w)) hiCount++;
+          if (TENGLISH_MARKERS.has(w)) teCount++;
+        }
+
+        if (teCount > 0 && teCount >= hiCount) return { code: 'tenglish', name: 'Tenglish (Roman Telugu)' };
+        if (hiCount >= 2) return { code: 'hinglish', name: 'Hinglish (Code-mixed)' };
+        return { code: 'english', name: 'English' };
+      }
+
+      // ── Input Live Feedback ──
+      function updateInputMeta() {
+        const text = messageInput.value;
+        const len = text.length;
+        charCountDisplay.textContent = `${len} ${len === 1 ? 'character' : 'characters'}`;
+
+        if (len > 0) {
+          const lang = detectLanguage(text);
+          detectedLangDisplay.textContent = `Language: ${lang.name}`;
+          detectedLangDisplay.classList.add('active');
+          analyzeBtn.disabled = false;
+        } else {
+          detectedLangDisplay.textContent = 'Language: Auto-detect';
+          detectedLangDisplay.classList.remove('active');
+          analyzeBtn.disabled = false;
+        }
+      }
+
+      messageInput.addEventListener('input', updateInputMeta);
+
+      // Keyboard shortcuts for analysis (Ctrl+Enter / Cmd+Enter) & Clear (Esc)
+      messageInput.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          runAnalysis();
+        } else if (e.key === 'Escape') {
+          clearInput();
+        }
+      });
+
+      function clearInput() {
+        messageInput.value = '';
+        updateInputMeta();
+        resultsCard.classList.remove('active');
+        scannerCard.classList.remove('active');
+        messageInput.focus();
+      }
+
+      clearBtn.addEventListener('click', clearInput);
+
+      pasteBtn.addEventListener('click', async () => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.readText) {
+            const clipText = (await navigator.clipboard.readText()).slice(0, 10000);
+            if (clipText) {
+              messageInput.value = clipText;
+              updateInputMeta();
+              messageInput.focus();
+            }
+          } else {
+            messageInput.focus();
+          }
+        } catch (err) {
+          messageInput.focus();
+        }
+      });
+
+      // ── Curated Sample Messages (Clean, compact labels for mobile) ──
+      const SAMPLES = [
+        {
+          label: 'Hinglish Bank KYC',
+          type: 'scam',
+          text: 'Aapka HDFC account suspend ho gaya hai. KYC update karne ke liye turant is link par click karein: http://bit.ly/hdfc-kyc-verify'
+        },
+        {
+          label: 'Hindi Digital Arrest',
+          type: 'scam',
+          text: 'आपका बैंक खाता गैरकानूनी गतिविधियों के कारण ब्लॉक कर दिया गया है। तुरंत सत्यापन करें अन्यथा पुलिस द्वारा कानूनी कार्रवाई की जाएगी।'
+        },
+        {
+          label: 'Lottery Prize Trap',
+          type: 'scam',
+          text: 'CONGRATULATIONS! You have won Rs 50,000 cash bonus in lucky draw. Call 9876543210 or visit bit.ly/claim-cash immediately.'
+        },
+        {
+          label: 'Bank OTP Alert',
+          type: 'safe',
+          text: 'Your OTP for ICICI Bank NetBanking is 482910. Valid for 5 mins. NEVER share OTP with anyone, even bank staff. Ref: TXN9941.'
+        },
+        {
+          label: 'Swiggy Delivery Update',
+          type: 'safe',
+          text: 'Swiggy: Your food order from Biryani Blues is out for delivery. Suresh will arrive in 12 mins. Track live in app.'
+        },
+        {
+          label: 'SIM Card Expiry Trap',
+          type: 'scam',
+          text: 'Dear customer, your Airtel SIM card will be deactivated in 24 hours due to pending verification. Call customer care 9823456789.'
+        }
+      ];
+
+      function renderSamples() {
+        samplesContainer.innerHTML = '';
+        SAMPLES.forEach((sample, idx) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'sample-chip';
+          btn.innerHTML = `
+            <span class="sample-tag ${sample.type === 'scam' ? 'scam' : 'safe'}">${sample.type === 'scam' ? 'Scam' : 'Safe'}</span>
+            <span>${sample.label}</span>
+          `;
+          btn.addEventListener('click', () => {
+            messageInput.value = sample.text;
+            updateInputMeta();
+            runAnalysis();
+          });
+          samplesContainer.appendChild(btn);
+        });
+      }
+      renderSamples();
+
+      // ── API Health Check ──
+      async function checkApiHealth() {
+        apiStatusDot.style.backgroundColor = 'var(--warn-main)';
+        apiStatusText.textContent = 'Probing API...';
+
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2000);
+          const res = await fetch(`${CONFIG.apiBase}${CONFIG.healthPath}`, {
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const data = await res.json();
+            if (!data.model_loaded) throw new Error('Backend is running without a loaded model');
+            CONFIG.isApiOnline = true;
+            apiStatusBadge.classList.add('is-live');
+            apiStatusDot.style.backgroundColor = 'var(--safe-main)';
+            apiStatusText.textContent = `Live ML Model (${data.model_version || 'unknown'})`;
+            apiStatusBadge.title = 'Connected to the trained model through the FastAPI backend';
+            return;
+          }
+        } catch (e) {
+          // Fallback to Demo Mode
+        }
+
+        CONFIG.isApiOnline = false;
+        apiStatusBadge.classList.remove('is-live');
+        apiStatusDot.style.backgroundColor = 'var(--warn-main)';
+        apiStatusText.textContent = 'Demo Mode (Local Heuristics)';
+        apiStatusBadge.title = 'The trained model is unavailable. Results use local demo heuristics.';
+      }
+
+      // Highlight the active section as the user scrolls. Purely visual; the tabs are
+      // plain anchor links so they still work with JS disabled.
+      const tabLinks = Array.from(document.querySelectorAll('.tabbar-tab'));
+      const tabTargets = [
+        { link: tabLinks[0], id: 'analyzer' },
+        { link: tabLinks[1], id: 'safety' },
+        { link: tabLinks[2], id: 'report' },
+        { link: tabLinks[3], id: 'about' },
+      ].filter((t) => t.link && document.getElementById(t.id));
+
+      if (tabTargets.length) {
+        const setActive = (id) => {
+          tabTargets.forEach((t) => {
+            const on = t.id === id;
+            t.link.classList.toggle('is-active', on);
+            t.link.setAttribute('aria-selected', on ? 'true' : 'false');
+          });
+        };
+        tabTargets.forEach((t) => {
+          t.link.addEventListener('click', () => setActive(t.id));
+        });
+        const sections = tabTargets.map((t) => document.getElementById(t.id));
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) setActive(e.target.id);
+          });
+        }, { rootMargin: '-20% 0px -65% 0px', threshold: 0 });
+        sections.forEach((s) => observer.observe(s));
+      }
+
+      function refreshApiHealth() {
+        apiHealthPromise = checkApiHealth().finally(() => { apiHealthPromise = null; });
+        return apiHealthPromise;
+      }
+      apiStatusBadge.addEventListener('click', refreshApiHealth);
+      // Run the first model check; analysis waits for this result if clicked early.
+      refreshApiHealth();
+
+      // Reflects API state on the badge from anywhere in the app, so a
+      // cold-start retry can say "waking up" instead of leaving a stale label.
+      function setApiStatus(state, label) {
+        if (state === 'ok') {
+          CONFIG.isApiOnline = true;
+          apiStatusBadge.classList.add('is-live');
+          apiStatusDot.style.backgroundColor = 'var(--safe-main)';
+          apiStatusText.textContent = label || 'Live ML API';
+          return;
+        }
+        if (state === 'warming') {
+          CONFIG.isApiOnline = false;
+          apiStatusBadge.classList.remove('is-live');
+          apiStatusDot.style.backgroundColor = 'var(--warn-main)';
+          apiStatusText.textContent = label || 'Server waking up…';
+          apiStatusBadge.title = 'The host is cold-starting. Retrying once.';
+          return;
+        }
+        CONFIG.isApiOnline = false;
+        apiStatusBadge.classList.remove('is-live');
+        apiStatusDot.style.backgroundColor = 'var(--warn-main)';
+        apiStatusText.textContent = 'Demo Mode (Local Heuristics)';
+        apiStatusBadge.title = 'No live ML server detected. Results below come from a ' +
+          'keyword checklist, not the trained classifier.';
+      }
+
+      // ── Heuristic Analysis Engine (Client-Side Fallback) ──
+      function evaluateLocalHeuristics(text) {
+        const lower = text.toLowerCase();
+        let spamScore = 0.50; // Neutral baseline
+        const signals = [];
+
+        // 1. Credential Pressure & Verification
+        if (/otp|kyc|verify|verification|pin\b|cvv|aadhaar|pan\b|password|khata|खाता|बायोमेट्रिक/.test(lower)) {
+          spamScore += 0.28;
+          signals.push({
+            name: 'Credential Harvesting Request',
+            severity: 'high',
+            desc: 'Requests sensitive credentials, OTP numbers, or immediate KYC verification.'
+          });
+        }
+
+        // 2. High Urgency & Time Pressure
+        if (/urgent|turant|immediately|jaldi|deadline|24 hours|expire|blocked today|suspend|deactivat|तुरंत|तात्कालिक|వెంటనే/.test(lower)) {
+          spamScore += 0.22;
+          signals.push({
+            name: 'Artificial Urgency & Pressure',
+            severity: 'high',
+            desc: 'Pressures the recipient with imminent deadlines or loss of service.'
+          });
+        }
+
+        // 3. Suspicious Links or Redirections
+        if (/http:\/\/|https:\/\/|bit\.ly|tinyurl|\.xyz|\.top|click here|link par|open now/.test(lower)) {
+          spamScore += 0.24;
+          signals.push({
+            name: 'Suspicious External Link',
+            severity: 'high',
+            desc: 'Directs user to shortened or unverified external links prone to credential harvesting.'
+          });
+        }
+
+        // 4. Authority & Impersonation
+        if (/police|arrest|cyber cell|court|customs|digital arrest|fir\b|income tax|cbi\b/.test(lower)) {
+          spamScore += 0.30;
+          signals.push({
+            name: 'Authority Impersonation',
+            severity: 'high',
+            desc: 'Invokes law enforcement, court orders, or arrest threats to provoke panic.'
+          });
+        }
+
+        // 5. Hard Negative Protections (Legitimate transactional phrasing)
+        const hasProtectiveDisclaimer = /never (asks|ask|share)|do not share|never call you|bank never asks/.test(lower);
+        if (hasProtectiveDisclaimer) {
+          spamScore -= 0.35;
+          signals.push({
+            name: 'Explicit Security Advisory',
+            severity: 'protective',
+            desc: 'Includes standard banking security advisory explicitly warning against sharing credentials.'
+          });
+        }
+
+        const isTransactional = /credited to|debited from|balance|bal:|out for delivery|arriving in|order confirmed|track live/.test(lower);
+        if (isTransactional) {
+          spamScore -= 0.28;
+          signals.push({
+            name: 'Standard Transactional Context',
+            severity: 'protective',
+            desc: 'Matches structure of automated e-commerce or bank account notification.'
+          });
+        }
+
+        // Length adjustments
+        if (text.length > 120 && spamScore > 0.5) spamScore += 0.05;
+        if (text.length < 40 && spamScore < 0.5) spamScore -= 0.05;
+
+        // Bound probability
+        const finalScore = Math.max(0.04, Math.min(0.97, spamScore));
+
+        if (signals.length === 0) {
+          signals.push({
+            name: 'Neutral Conversational Phrasing',
+            severity: 'neutral',
+            desc: 'No aggressive spam keywords or suspicious URL structures were detected.'
+          });
+        }
+
+        return {
+          score: finalScore,
+          signals: signals,
+          isLiveApi: false
+        };
+      }
+
+      // ── API Inference Engine ──
+      // Marks the confidence figure as a heuristic when the API is unavailable,
+      // so a keyword-arithmetic number is never presented as model confidence.
+      function setConfidenceQualifier(isHeuristic) {
+        let tag = document.getElementById('confidenceQualifier');
+        if (!tag) {
+          tag = document.createElement('span');
+          tag.id = 'confidenceQualifier';
+          tag.style.cssText = 'display:block;font-size:0.62rem;font-weight:600;' +
+            'letter-spacing:0.04em;margin-top:2px;color:var(--warn-main);';
+          const parent = document.getElementById('confidenceValue');
+          if (parent && parent.parentElement) parent.parentElement.appendChild(tag);
+        }
+        tag.textContent = isHeuristic ? 'HEURISTIC ESTIMATE — NOT MODEL CONFIDENCE' : '';
+        tag.style.display = isHeuristic ? 'block' : 'none';
+      }
+
+      async function queryApiBackend(text) {
+        const attempt = async (timeoutMs) => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+          try {
+            const response = await fetch(`${CONFIG.apiBase}${CONFIG.predictPath}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: text }),
+              signal: controller.signal
+            });
+            if (!response.ok) throw new Error(`API error HTTP ${response.status}`);
+            return await response.json();
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        };
+
+        let data;
+        try {
+          // First try is short and snappy for a warm server.
+          data = await attempt(CONFIG.predictTimeoutMs || 4000);
+        } catch (err) {
+          // Free-tier hosts (Render) sleep after ~15 min idle and take ~30s to
+          // cold start. A single short timeout silently degraded to heuristics,
+          // so retry once with a long budget before giving up.
+          if (err.name === 'AbortError' && CONFIG.retryOnColdStart) {
+            console.info('API timed out; retrying once in case the server is cold-starting.');
+            if (typeof setApiStatus === 'function') setApiStatus('warming', 'Server waking up… retrying');
+            try {
+              data = await attempt(CONFIG.coldStartTimeoutMs || 60000);
+              if (typeof setApiStatus === 'function') setApiStatus('ok');
+            } catch (err2) {
+              console.warn('API unavailable after retry:', err2.message);
+              if (typeof setApiStatus === 'function') setApiStatus('offline');
+              return evaluateLocalHeuristics(text);
+            }
+          } else {
+            console.warn('API call failed, falling back to local heuristics:', err.message);
+            if (typeof setApiStatus === 'function') setApiStatus('offline');
+            return evaluateLocalHeuristics(text);
+          }
+        }
+
+        if (!data || !['legitimate', 'marketing_spam', 'scam'].includes(data.verdict) ||
+            !Number.isFinite(data.confidence) || !data.probabilities ||
+            !Number.isFinite(data.probabilities.scam)) {
+          console.warn('Backend returned an invalid prediction response; using demo heuristics.');
+          if (typeof setApiStatus === 'function') setApiStatus('offline');
+          return evaluateLocalHeuristics(text);
+        }
+
+        // Map the three-class model response. Threat likelihood is P(scam),
+        // while confidence is the probability of the winning class.
+        const mappedSignals = (data.signals || []).map((s) => ({
+          name: s.label ? s.label.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : 'Pattern Signal',
+          severity: s.severity === 'high' ? 'high' : s.severity === 'medium' ? 'medium' : s.severity === 'protective' ? 'protective' : 'neutral',
+          desc: s.description || s.desc || `Signal weight: ${((s.weight || 0) * 100).toFixed(0)}% contribution to the verdict score.`
+        }));
+
+        return {
+          score: data.probabilities.scam,
+          confidence: data.confidence,
+          verdict: data.verdict,
+          signals: mappedSignals.length ? mappedSignals : [{ name: 'Model Prediction', severity: data.verdict === 'scam' ? 'high' : 'protective', desc: 'Evaluated by deployed ML classifier.' }],
+          isLiveApi: true,
+          modelVersion: data.model_version,
+          latencyMs: data.latency_ms,
+          language: data.language,
+          script: data.script,
+          distractorKeywords: data.distractor_keywords,
+          rulesFired: data.rules_fired
+        };
+      }
+
+      // ── History Management ──
+      const HISTORY_STORAGE_KEY = 'spam_shield_history_v1';
+
+      function loadHistory() {
+        try {
+          const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+
+        // Default initial items
+        return [
+          {
+            text: 'Your HDFC account has been suspended. Click here to verify KYC immediately: http://bit.ly/hdfc-kyc',
+            verdict: 'spam',
+            confidence: 94,
+            timestamp: '10 mins ago'
+          },
+          {
+            text: 'Your OTP for ICICI Bank NetBanking is 482910. Valid for 5 mins. NEVER share OTP with anyone.',
+            verdict: 'safe',
+            confidence: 8,
+            timestamp: '1 hour ago'
+          },
+          {
+            text: 'Swiggy: Your food order is out for delivery. Suresh arriving in 12 mins.',
+            verdict: 'safe',
+            confidence: 12,
+            timestamp: 'Yesterday'
+          }
+        ];
+      }
+
+      function saveHistory(list) {
+        try {
+          localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(list.slice(0, 10)));
+        } catch (e) {}
+      }
+
+      function addToHistory(item) {
+        const list = loadHistory();
+        list.unshift(item);
+        saveHistory(list);
+        renderHistory();
+      }
+
+      function renderHistory() {
+        const list = loadHistory();
+        historyCountBadge.textContent = `${list.length} ${list.length === 1 ? 'item' : 'items'}`;
+
+        if (list.length === 0) {
+          historyListContainer.innerHTML = '<div class="history-empty-state">No recent checks recorded. Try analyzing a message above.</div>';
+          return;
+        }
+
+        historyListContainer.innerHTML = '';
+        list.forEach((item, index) => {
+          const el = document.createElement('div');
+          el.className = 'history-item';
+          const isSpam = item.verdict === 'scam' || item.verdict === 'spam';
+          const isMarketing = item.verdict === 'marketing_spam';
+
+          el.innerHTML = `
+            <div class="history-item-left">
+              <div class="history-item-icon ${isSpam ? 'is-spam' : isMarketing ? 'is-unsure' : 'is-safe'}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  ${isSpam ? '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>' : isMarketing ? '<circle cx="12" cy="12" r="10"></circle><path d="M8 12h8"></path>' : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>'}
+                </svg>
+              </div>
+              <div class="history-item-content">
+                <span class="history-snippet">${escapeHtml(item.text)}</span>
+                <span class="history-meta">${item.timestamp || 'Recent check'}</span>
+              </div>
+            </div>
+            <div class="history-item-right">
+              <span class="history-score-tag ${isSpam ? 'is-spam' : isMarketing ? 'is-unsure' : 'is-safe'}">
+                ${isSpam ? 'Likely Scam' : isMarketing ? 'Marketing Spam' : 'Likely Legitimate'} (${item.confidence}%)
+              </span>
+            </div>
+          `;
+
+          el.addEventListener('click', () => {
+            messageInput.value = item.text;
+            updateInputMeta();
+            runAnalysis();
+          });
+
+          historyListContainer.appendChild(el);
+        });
+      }
+
+      clearHistoryBtn.addEventListener('click', () => {
+        saveHistory([]);
+        renderHistory();
+      });
+
+      renderHistory();
+
+      // ── Analysis Workflow ──
+      async function runAnalysis() {
+        const text = messageInput.value.trim();
+        if (!text) {
+          messageInput.focus();
+          return;
+        }
+        if (text.length > 10000) {
+          messageInput.value = text.slice(0, 10000);
+          updateInputMeta();
+        }
+        if (apiHealthPromise) await apiHealthPromise;
+
+        // Hide prior results, show scanning state smoothly
+        resultsCard.classList.remove('active');
+        scannerCard.classList.add('active');
+        analyzeBtn.disabled = true;
+
+        const scanStages = [
+          'Tokenizing text & mapping character distributions...',
+          'Scanning for high-urgency keywords & psychological triggers...',
+          'Evaluating hyperlink signatures & credential prompts...',
+          'Computing final classification probabilities...'
+        ];
+
+        let stageIdx = 0;
+        scanningStatusText.style.opacity = '1';
+        scanningStatusText.textContent = scanStages[0];
+
+        const statusInterval = setInterval(() => {
+          stageIdx = (stageIdx + 1) % scanStages.length;
+          scanningStatusText.style.opacity = '0';
+          setTimeout(() => {
+            scanningStatusText.textContent = scanStages[stageIdx];
+            scanningStatusText.style.opacity = '1';
+          }, 80);
+        }, 200);
+
+        // Perform analysis (either live API or local heuristics)
+        const startTime = Date.now();
+        let result;
+        if (CONFIG.isApiOnline) {
+          result = await queryApiBackend(text);
+        } else {
+          result = evaluateLocalHeuristics(text);
+        }
+
+        // Brief, calibrated scanning duration (approx 620ms) for calm, responsive feedback
+        const elapsed = Date.now() - startTime;
+        const remainingDelay = Math.max(0, 620 - elapsed);
+        await new Promise((r) => setTimeout(r, remainingDelay));
+
+        clearInterval(statusInterval);
+        scannerCard.classList.remove('active');
+        analyzeBtn.disabled = false;
+
+        // Render Results with smooth transitions
+        displayResult(text, result);
+      }
+
+      analyzeBtn.addEventListener('click', runAnalysis);
+      resetBtn.addEventListener('click', clearInput);
+
+      function displayResult(text, result) {
+        const p = result.score;
+        const threatPct = Math.round(p * 100);
+        const pct = Math.round((result.isLiveApi ? result.confidence : p) * 100);
+        const verdict = result.isLiveApi ? result.verdict
+          : p >= 0.65 ? 'scam' : p <= 0.35 ? 'legitimate' : 'review';
+        const isSpam = verdict === 'scam';
+        const isSafe = verdict === 'legitimate';
+        const isMarketing = verdict === 'marketing_spam';
+        const isUnsure = !isSpam && !isSafe;
+
+        // Set classes
+        verdictIconBadge.className = 'verdict-icon-badge ' + (isSpam ? 'is-spam' : isSafe ? 'is-safe' : 'is-unsure');
+        verdictHeading.className = 'verdict-label ' + (isSpam ? 'is-spam' : isSafe ? 'is-safe' : 'is-unsure');
+        confidenceValue.className = 'confidence-percentage ' + (isSpam ? 'is-spam' : isSafe ? 'is-safe' : 'is-unsure');
+        confidenceFill.className = 'confidence-fill ' + (isSpam ? 'is-spam' : isSafe ? 'is-safe' : 'is-unsure');
+
+        if (isSpam) {
+          verdictHeading.textContent = 'Likely Scam';
+          verdictDescription.textContent = 'The model classified this message as a scam. Treat the request cautiously.';
+          confidenceStatusLabel.textContent = `${threatPct}% Scam Risk`;
+          verdictIconBadge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          `;
+        } else if (isSafe) {
+          verdictHeading.textContent = 'Likely Safe';
+          verdictDescription.textContent = 'The model classified this message as legitimate. Still verify unexpected requests independently.';
+          confidenceStatusLabel.textContent = `${threatPct}% Scam Risk`;
+          verdictIconBadge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          `;
+        } else if (isMarketing) {
+          verdictHeading.textContent = 'Marketing Spam';
+          verdictDescription.textContent = 'Unsolicited promotional content detected; this is distinct from a scam.';
+          confidenceStatusLabel.textContent = `${threatPct}% Scam Risk`;
+          verdictIconBadge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle><path d="M8 12h8M12 8v8"></path>
+            </svg>
+          `;
+        } else {
+          verdictHeading.textContent = 'Needs Review';
+          verdictDescription.textContent = 'Ambiguous linguistic markers detected. Exercise caution before proceeding.';
+          confidenceStatusLabel.textContent = `${threatPct}% Scam Risk`;
+          verdictIconBadge.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          `;
+        }
+
+        confidenceValue.textContent = `${pct}%`;
+        confidenceTrack.setAttribute('aria-valuenow', threatPct);
+        confidenceFill.style.width = '0%';
+        requestAnimationFrame(() => {
+          confidenceFill.style.width = `${threatPct}%`;
+        });
+
+        // Source banner (ensures strict compliance with truth in labeling)
+        if (result.isLiveApi) {
+          sourceNoticeText.textContent = `Live Model Inference · Model ${result.modelVersion || 'v0.1.0'} · Latency ${result.latencyMs || 12}ms`;
+          sourceNoticeTag.textContent = 'ML API Connected';
+          sourceNoticeTag.style.color = 'var(--safe-main)';
+        } else {
+          // The big percentage above is keyword arithmetic, not a model
+          // probability. It must never read as classifier confidence, so the
+          // figure is qualified inline as well as in this banner.
+          sourceNoticeText.textContent = 'Heuristic estimate only — the ML backend is unreachable, so this score comes from a keyword checklist, not the trained classifier. Do not rely on the percentage.';
+          sourceNoticeTag.textContent = 'Demo Simulation';
+          sourceNoticeTag.style.color = 'var(--warn-main)';
+          confidenceValue.textContent = `${pct}%`;
+          confidenceValue.setAttribute('title', 'Heuristic estimate, not model confidence');
+          if (typeof setConfidenceQualifier === 'function') setConfidenceQualifier(true);
+        }
+        if (result.isLiveApi && typeof setConfidenceQualifier === 'function') {
+          setConfidenceQualifier(false);
+        }
+
+        // Distractor panel — the hard-negative story made visible.
+        // A genuine bank alert contains the same scary words as a scam. When the
+        // classifier says "legitimate" on a message carrying those words, say so
+        // explicitly, otherwise a reader assumes the words drove the verdict.
+        const distractorPanel = document.getElementById('distractorPanel');
+        if (distractorPanel) {
+          const dk = result.distractorKeywords || [];
+          const isSafe = result.verdict === 'legitimate';
+          if (dk.length && isSafe && result.rulesFired && result.rulesFired.length === 0) {
+            distractorPanel.style.display = 'block';
+            distractorPanel.innerHTML = `
+              <div class="distractor-head">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  <polyline points="9 12 11 14 15 10"></polyline>
+                </svg>
+                Scary keywords present — but this message is legitimate
+              </div>
+              <div class="distractor-body">
+                Contains <strong>${dk.join('</strong>, <strong>')}</strong>, which
+                appear in genuine bank and service alerts as often as in fraud.
+                It was classified safe because it asks for
+                <strong>nothing in return</strong> — no OTP, no payment, no link.
+              </div>`;
+          } else if (dk.length) {
+            distractorPanel.style.display = 'block';
+            distractorPanel.classList.add('is-warn');
+            distractorPanel.innerHTML = `
+              <div class="distractor-head">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                Contains high-risk keywords
+              </div>
+              <div class="distractor-body">
+                <strong>${dk.join('</strong>, <strong>')}</strong> appear in
+                genuine alerts too, so they are reported rather than used alone.
+              </div>`;
+          } else {
+            distractorPanel.style.display = 'none';
+            distractorPanel.classList.remove('is-warn');
+          }
+        }
+
+        // Render Explainable Signals with staggered smooth entry
+        signalsContainer.innerHTML = '';
+        result.signals.forEach((sig) => {
+          const item = document.createElement('div');
+          item.className = 'signal-item';
+          item.innerHTML = `
+            <div class="signal-header">
+              <span class="signal-name">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                ${escapeHtml(sig.name)}
+              </span>
+              <span class="severity-badge ${sig.severity}">${sig.severity}</span>
+            </div>
+            <p class="signal-desc">${escapeHtml(sig.desc)}</p>
+          `;
+          signalsContainer.appendChild(item);
+        });
+
+        // Store current report data for copy feature
+        CONFIG.lastReportData = {
+          text: text,
+          verdict: isSpam ? 'Likely Scam' : isMarketing ? 'Marketing Spam' : isSafe ? 'Likely Legitimate' : 'Needs Review',
+          confidence: `${pct}%`,
+          mode: result.isLiveApi ? 'Live ML Model' : 'Demo Heuristics',
+          signals: result.signals.map((s) => `- ${s.name} [${s.severity}]: ${s.desc}`).join('\n')
+        };
+
+        // Reveal result card with smooth animation
+        resultsCard.classList.add('active');
+
+        // Scroll gently into view
+        resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Record to History
+        addToHistory({
+          text: text,
+          verdict: verdict,
+          confidence: pct,
+          timestamp: 'Just now'
+        });
+      }
+
+      // Copy Analysis Report to Clipboard
+      copyReportBtn.addEventListener('click', async () => {
+        if (!CONFIG.lastReportData) return;
+        const report = `SPAM SHIELD ANALYSIS REPORT
+--------------------------------
+Verdict: ${CONFIG.lastReportData.verdict}
+Confidence: ${CONFIG.lastReportData.confidence}
+Engine: ${CONFIG.lastReportData.mode}
+Timestamp: ${new Date().toLocaleString()}
+
+Inspected Message:
+"${CONFIG.lastReportData.text}"
+
+Detected Risk Signals:
+${CONFIG.lastReportData.signals}
+--------------------------------
+Generated by Spam Shield`;
+
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(report);
+            const orig = copyReportBtn.innerHTML;
+            copyReportBtn.innerHTML = `
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--safe-main);">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Copied to Clipboard!
+            `;
+            setTimeout(() => { copyReportBtn.innerHTML = orig; }, 2000);
+          }
+        } catch (err) {
+          alert('Report:\n\n' + report);
+        }
+      });
+
+      // Simple HTML escaping helper for untrusted user inputs
+      function escapeHtml(str) {
+        if (!str) return '';
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // Initialize initial char count
+      updateInputMeta();
+    })();
+  </script>
+</body>
+</html>

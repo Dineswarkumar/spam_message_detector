@@ -1,0 +1,59 @@
+{
+  "model_version": "ss-charlr-v3",
+  "model_type": "LogisticRegression on char_wb(2,5) TF-IDF",
+  "classes": [
+    "legitimate",
+    "marketing_spam",
+    "scam"
+  ],
+  "trained_at": "2026-10-10T10:38:47.730194+00:00",
+  "training_rows": 19184,
+  "label_distribution": {
+    "legitimate": 11340,
+    "marketing_spam": 2696,
+    "scam": 5148
+  },
+  "vectorizer": {
+    "char": {
+      "analyzer": "char_wb",
+      "ngram_range": [
+        2,
+        5
+      ],
+      "min_df": 2,
+      "max_features": 300000,
+      "sublinear_tf": true
+    }
+  },
+  "model_selection": {
+    "chosen": "char-only TF-IDF -> LogisticRegression",
+    "why": "Hard-negative miss rate is the primary axis for this project and is now a tie (1.19%-1.52% across candidates), so the old justification for shipping LinearSVC no longer holds. macro-F1 differences sit inside the seed spread; the choice is made on hard-negative miss rate, stability across grouped splits, and the absence of the word-n-gram false-scam failure mode.",
+    "previous_choice": "calibrated LinearSVC on word+char TF-IDF",
+    "previous_choice_invalidated_because": "its 24-point hard-negative advantage was caused by missing legitimate training data, not by the classifier. Closing that data gap removed the advantage entirely.",
+    "seed_stability_macro_f1": {
+      "word+char_LR": "92.51 +/- 2.00",
+      "char_only_LR": "93.16 +/- 1.07",
+      "word+char_SVC": "91.61 +/- 3.69"
+    },
+    "seed_stability_hard_neg_miss": {
+      "word+char_LR": "1.52%",
+      "char_only_LR": "1.19%",
+      "word+char_SVC": "1.52%"
+    }
+  },
+  "validation_metrics": {
+    "accuracy": 0.9241,
+    "macro_f1": 0.9194,
+    "n": 4082
+  },
+  "evaluation_status": "indicative_single_annotator_reviewed",
+  "evaluation_note": "The published 74.4% macro-F1 is indicative: 305 messages were labelled by one annotator, who has also human-reviewed the 78 initial model disagreements. There is no second annotator or inter-annotator agreement statistic; the published score remains against the original labels.",
+  "known_limitations": [
+    "Tenglish and Hindi support is synthetic-only and unaudited by a native speaker.",
+    "Roughly 6% of the labelled corpus sits in a review queue and is excluded from training.",
+    "marketing_spam vs scam is a judgement boundary, not a crisp fact.",
+    "Validation accuracy on the pure-Devanagari and pure-Telugu slices is near chance. Those scripts have too few rows to support a per-language claim; see the ADEQUACY CHECK in the corpus build log.",
+    "macro-F1 differences between the top two candidate models are inside the seed spread, so the shipping choice rests on the hard-negative axis and on stability, not on macro-F1."
+  ],
+  "privacy": "Message bodies are processed in memory and never written to disk or application logs."
+}

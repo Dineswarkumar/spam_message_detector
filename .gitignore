@@ -1,4 +1,48 @@
+# Python runtime and virtual environments
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyd
+.venv/
+venv/
+env/
+ENV/
+
+# Local configuration and credentials
 .env
+.env.*
+!.env.example
+
+# Logs and local runtime state
+*.log
+*.pid
+*.sqlite
+*.sqlite3
+
+# Private/source datasets and generated message data
+# Keep dataset-building and evaluation scripts; ignore their data inputs/outputs.
+*.bak
+/data/*.csv
+/data/*.xls
+/data/*.xlsx
+/data/raw/
+/data/interim/
+/data/synthetic/
+/data/processed/*.csv
+/data/processed/*.xls
+/data/processed/*.xlsx
+/data/processed/*.bak
+/data/processed/baseline_report*.txt
+/data/processed/model_comparison.json
+/dataset/
+
+# Local project instructions and editor/OS files
+/AGENTS.md
+.vscode/
+.idea/
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Build output
+/build/
+/dist/
