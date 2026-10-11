@@ -2,7 +2,7 @@
 
 SMS and message scam checker for English, Hinglish, and Indian-language messages.
 
-- Live demo: `https://YOUR-APP-NAME.onrender.com` *(replace after deployment)*
+- Live demo: https://spam-message-detector-mk6g.onrender.com/
 - Local app: `http://127.0.0.1:8000/`
 - Status: prototype; not a security product
 
