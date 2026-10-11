@@ -4,21 +4,18 @@ SMS and message scam checker for English, Hinglish, and Indian-language messages
 
 - Live demo: `https://YOUR-APP-NAME.onrender.com` *(replace after deployment)*
 - Local app: `http://127.0.0.1:8000/`
-- Status: prototyp2e; not a security product
+- Status: prototype; not a security product
 
 ## Screenshots
 
-- **Safety rules**
+| **Live Analysis (Marketing Spam)** | **Detection Engine & Metrics** |
+|:---:|:---:|
+|<img width="100%" src="https://github.com/user-attachments/assets/5af4bb69-d165-4714-8ae5-3d5d8843d0ed" /> | <img src="docs/screenshots/detection-engine.png" alt="Detection Engine Details" width="100%"/> |
 
-  ![Spam Shield safety rules](docs/screenshots/safety-rules.png)
+| **Safety Rules & Guidance** | **Report Fraud Channels** |
+|:---:|:---:|
+| <img src="docs/screenshots/safety-rules.png" alt="Safety Rules" width="100%"/> | <img src="docs/screenshots/report-fraud.png" alt="Report Fraud Guidance" width="100%"/> |
 
-- **Report fraud**
-
-  ![Report fraud guidance](docs/screenshots/report-fraud.png)
-
-- **Detection engine**
-
-  ![Detection engine details](docs/screenshots/detection-engine.png)
 
 ## What it does
 
