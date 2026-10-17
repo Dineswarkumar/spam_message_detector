@@ -6,12 +6,12 @@
     "marketing_spam",
     "scam"
   ],
-  "trained_at": "2026-10-10T10:38:47.730194+00:00",
-  "training_rows": 19184,
+  "trained_at": "2026-10-17T13:45:21.575873+00:00",
+  "training_rows": 18945,
   "label_distribution": {
-    "legitimate": 11340,
-    "marketing_spam": 2696,
-    "scam": 5148
+    "legitimate": 10852,
+    "marketing_spam": 2438,
+    "scam": 5655
   },
   "vectorizer": {
     "char": {
@@ -42,12 +42,12 @@
     }
   },
   "validation_metrics": {
-    "accuracy": 0.9241,
-    "macro_f1": 0.9194,
-    "n": 4082
+    "accuracy": 0.9444,
+    "macro_f1": 0.8562,
+    "n": 4174
   },
   "evaluation_status": "indicative_single_annotator_reviewed",
-  "evaluation_note": "The published 74.4% macro-F1 is indicative: 305 messages were labelled by one annotator, who has also human-reviewed the 78 initial model disagreements. There is no second annotator or inter-annotator agreement statistic; the published score remains against the original labels.",
+  "evaluation_note": "The published score is indicative: 305 messages were labelled by one annotator, who also human-reviewed the 78 initial model disagreements. There is no second annotator or agreement statistic; the score remains against the original labels.",
   "known_limitations": [
     "Tenglish and Hindi support is synthetic-only and unaudited by a native speaker.",
     "Roughly 6% of the labelled corpus sits in a review queue and is excluded from training.",

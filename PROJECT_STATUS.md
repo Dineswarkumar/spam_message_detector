@@ -1,6 +1,8 @@
 # Spam Shield — Project Completeness Report
 
-Generated 2026-10-10. Every number below was read off disk, not from memory.
+Generated 2026-10-17. This report includes the latest local mobile-SMS
+integration and validation metrics; see `notes/MOBILE_SMS_EVALUATION.md` for
+the focused bias check and its limitations.
 
 **One-line summary:** the ML pipeline and detection engine are finished and
 verified; the trained artifact is connected to the API and the API serves the UI
@@ -17,7 +19,7 @@ second annotator or agreement statistic.
 |---|---|---|
 | Dataset audit | **100%** | `scripts/audit_dataset.py` on all 8 sources |
 | Synthetic data generation | **100%** | 56 templates × 4–5 languages, leakage-proven |
-| Corpus build + labelling | **100%** | 28,854 trainable rows, 6 guards, fixture-tested |
+| Corpus build + labelling | **100%** | 29,040 trainable rows after adding 186 reviewed mobile-SMS templates; 6 guards, fixture-tested |
 | Context guards | **100%** | 235/235 template fixtures + 9/9 anti-suppression |
 | Split construction | **100%** | grouped by template/dup-group, 0 overlap asserted |
 | Model + selection | **100%** | 4 candidates × 3 seeds, documented in `notes/MODEL_SELECTION.md` |
@@ -52,17 +54,17 @@ legit rows too.
 ### 2.2 Corpus
 
 ```
-28,854 trainable rows
-  legitimate      17,212
-  scam             6,980
-  marketing_spam   4,662
+29,040 trainable rows
+  legitimate      17,338
+  scam             6,981
+  marketing_spam   4,721
 
  1,836 rows parked in review_queue.csv (6.4%) — excluded, not guessed
 ```
 
 By source: synthetic 11,948 · phishing5971 5,573 · uci 5,288 ·
 synthetic_marketing 3,200 · indian2011 1,558 · legacy_ml 561 · atharva 437 ·
-ysangam 289
+ysangam 289 · mobile_sms_review 186
 
 ### 2.3 Synthetic templates (the multilingual layer)
 
@@ -81,9 +83,9 @@ contain *account*, *blocked*, *verify* but are **not** fraud.
 
 | Slice | Rows | Grouping | Status |
 |---|---|---|---|
-| train | 19,184 | `template_id` / `dup_group` | used for fitting |
-| val | 4,082 | same | only iteration surface |
-| test | 5,588 | same | **contaminated — never scored** |
+| train | 18,945 | `template_id` / `dup_group` | used for fitting |
+| val | 4,174 | same | only iteration surface |
+| test | 5,921 | same | **contaminated — never scored** |
 
 `split_test.csv` is kept for provenance only. All four candidates were scored on
 it during the original comparison, so it cannot be un-contaminated.
@@ -229,11 +231,18 @@ tracking. Direct click-through remains unverified.
 
 | | Validation | Human-labelled test set |
 |---|---|---|
-| Rows | 4,082 | 305 |
-| Accuracy | 92.41% | **74.43%** |
-| Macro-F1 | 91.94% | **74.44%** |
-| Hard-negative miss | 1.19% | 17.9% (n=28) |
+| Rows | 4,174 | 305 |
+| Accuracy | 94.44% | **74.43%** |
+| Macro-F1 | 85.62% | **74.44%** |
+| Hard-negative miss | 0% (n=377) | 17.9% (n=28) |
 | Annotators | n/a | **1 — no kappa** |
+
+Current validation is a new grouped split after adding mobile examples; it
+supersedes the prior 4,082-row validation figure. It remains an iteration
+metric, not the final score. The mobile sample's 28 validation rows scored 75%
+accuracy (21/28), with only one scam example. See
+`notes/MOBILE_SMS_EVALUATION.md` for the language breakdown and the remaining
+cross-source near-duplicate audit limitation.
 
 **These are not comparable.** The test set was drawn from the review queue — the
 messages our own labeller refused to decide — so it is the hardest slice

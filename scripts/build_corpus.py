@@ -545,6 +545,29 @@ def load_sources():
                     src_id=f"mk:{i}", template_id=r["template_id"],
                     category=r["category"], real=False)
 
+    # Human-reviewed, locally redacted SMS export. Unresolved rows are omitted.
+    # Labels from the sheet are authoritative; do not run them through the
+    # heuristic classifier. The private CSV is ignored by git.
+    p = OUT / "mobile_sms_review_classified.csv"
+    if p.exists():
+        allowed = {"legitimate", "marketing_spam", "scam"}
+        seen = {}
+        with p.open(encoding="utf-8-sig", newline="") as fh:
+            for i, r in enumerate(csv.DictReader(fh)):
+                label = (r.get("label") or "").strip().lower()
+                text = (r.get("text_redacted") or "").strip()
+                if label not in allowed or not text:
+                    continue
+                key = norm(text)
+                if key in seen and seen[key] != label:
+                    raise ValueError("Conflicting human labels in mobile SMS review sheet")
+                seen[key] = label
+                add(text, label, "mobile_sms_review", src_id=f"mobile:{i}",
+                    category="user_reviewed_sms")
+                rows[-1]["_human_target_label"] = label
+                rows[-1]["_human_label_reason"] = "user-reviewed redacted mobile SMS"
+        print(f"  loaded {len(seen):,} reviewed mobile SMS templates; unresolved rows skipped")
+
     return rows
 
 
@@ -642,7 +665,14 @@ def main():
     for r in rows:
         lab, reason = classify(r["text"], r["original_label"])
         key = r["_norm"]
-        if key in overrides and overrides[key]:
+        if r.get("_human_target_label"):
+            n_override += 1
+            r["auto_target_label"] = lab
+            r["auto_label_reason"] = reason
+            lab = r["_human_target_label"]
+            reason = r["_human_label_reason"]
+            r["label_source"] = "human_mobile_review"
+        elif key in overrides and overrides[key]:
             n_override += 1
             r["auto_target_label"] = lab
             r["auto_label_reason"] = reason
